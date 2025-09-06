@@ -1,0 +1,13 @@
+UnBounded Knapsack:
+- In the previous article, we were only allowed to include each itme at most once. With the unbounded knapsack, we have no limit on how
+many times we can include an item. As uch, we are faced with the following question.
+
+Q. Given a list of N items, and backpack with a limited capacity, return the maximum total profit that can be contained in the
+backpack. The i-th item's profit is profit[i] and it's weight[i]. Assume you can have an unlimited number of each item available.
+
+- Again, we are trying to maximize our total profit by choosing items such that our capacity remains >= 0. Since we can include a
+given item multiple times, our decision tree's height will end up being m, where m is the total capacity. This is different compared
+to the 0/1 where the height of our decision tree was n, where n was the length of the profit and weight array.
+- Same as before, at any given item, we can choose to include it or exclude it. The difference here is that when we include an item,
+we can keep on including it until we no longer have the capacity for it. Here is a decision tree visualized. Can you spot the
+difference?

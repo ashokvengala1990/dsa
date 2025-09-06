@@ -1,0 +1,27 @@
+- Palindrome problems can also be solved with dynamic programming. Although the pattern by which they are solved is not the typical
+DFS/memoization/botton-up approach.
+
+- Q: Given a string S, return the length of the longest palindromic substring within S.
+
+- A palindrome is a sequence of characters that read the same backwards as forwards. Think "racecar", or "aba". So, by definition, a palindromic substring is a contiguous part of a string
+that is a palindrome.
+- We discussed how to determine whether a string is a palindrome in the two pointers lesson. However, here we are faced with a variation, i.e. finding the length of the longest palindromic
+substring.
+
+- Brute Force Approach
+The brute force way of approaching this is to go through every possible substring and determine if it is a palindrome using the two pointer approach. If n is the number of characters in our
+string, and the number of substrings that each character can form increases in a linear fashion to n, we will have n^2 substrings in total. Then, given these n^2 substrings, and the longest
+substring being of length n, the total time complexity comes to O(n^3).
+
+- Dynamic Programming Approach
+If we compare the first and the last character and they are equal, the sub-problem is the determining whether the inner string, excluding the characters at index 0 and length - 1, is a
+palindrome. If the inner string is a palindrome and so are the outer-most characters, we know the entire substring is a palindrome.
+
+Dynamic programming approach to this problem tells us that we should solve a sub-problem first, and then expand out. Given the string s = 'abaab', we can start from the middle and expand
+outwards. However, this will only give us palindromic substrings with a as the middle character. This does not guarantee that we will get the longest palindromic substring, and in the
+case of s, this approach fails because the longest palindromic substring is baab which is not formed by expanding out from a, at the 2nd index.
+
+1) Odd Length Substrings:
+2) Even Length Substrings:
+
+DP solution brings our O(n^3) time complexity to O(n^2) because we have n characters and to form a substring of each character is also n.

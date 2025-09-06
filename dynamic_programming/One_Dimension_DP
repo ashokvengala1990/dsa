@@ -1,0 +1,69 @@
+Dynamic Programming:
+- It is an optimized version of recursion.
+- It takes a big problem and solves it by breaking it down into smaller problems. The reason we say it is optimized
+recursion is because it is often more optimal when it comes to time and space.
+
+- DP tells us that we can avoid repeating computation by a concept called memoization, which is a fancy word for caching.
+- The idea here is that once we perform a computation, we can store it in a cache so that we do not have to repeat it. For
+example, if we calculate F(3), we can store the result in a hash map or array, and then we can retrieve the result from the
+cache if we encounter the same computation again.
+- This, in essence is the idea behind top down dynamic programming - it is recursion with memoization. The kye of our hash
+map will be the fibonacci number and the value will be its return value. This way, we can retrieve in O(1) time.
+
+Points to note:
+- We add a cache parameter to the function, which is either hash map or array
+- Add base for the problem
+- We add a another base case to check if the value of n is in the cache. If it is, we return the value stored in the
+cache rather than making a recursive call.
+- "Include to process current element" or "Remove element while backtracking"
+- After we compute the value of F(n), we store it in the cache so that we can retrieve it later if we need it.
+
+- The above is what is known as a top-down approach, and that is because we are traversing the tree from the root and going
+down all the way to our base cases, which is basically recursion anyways.
+- There is also a bottom-up approach, which computes the result of the base cases first and then works its way up. This is
+another approach we will be using to solve the fibonacci problem.
+
+- The time complexity for the fibonacci number is O(n) and the space complexity is O(n) as well. Thr real question here is
+if we even need to allocate space for an entire array. If we think about it, we are only ever using the previous two values
+to calculate the current value.
+- DP tells us that it is possible to get away with saving only the two previous values and then use them to calculate the
+next value(s) as long as we compute the values in order.
+-  So, if we take an array of size 2, we can bring our space complexity down to O(1). By doing this, we can just store the
+fibonacci number at the 1st index in a temporary variable, calculate the next fibonacci number and overwrite the value the
+1st index with the newly calculated fibonacci number, and finally overwrite the 0th index with our temporary variable
+- This is an example of 1-D dynamic programming because the result of every sub-problem can be stored in a 1-D data structure
+that is proportional to n, where n is the fibonacci number we are trying to calculate.
+
+
+==============> In Summary:
+1)Top Down Approach (Recursion with cache or Memoization):
+- We traverse the tree from the root and going down all the way to our base cases, which is basically recursion anyways.
+    - We add a cache parameter to the function, which it can be array or hashmap or hashset
+    - We add a base case to check if the value of n is in the cache. If it is, we return the value stored in the cache rather
+    than making a recursive call.
+    - After we compute the value of F(n), we store it in the cache so that we can retrieve it later if we need it.
+
+2) Bottom Up Approach (With for loop and DP or cache array):
+- There is also a bottom-up approach, which computes the result of the base cases first and then works it way up. This is another
+approach we will be using to solve the fibonacci problem.
+
+3)
+DP 1D or 2D Problems:
+- Understand a DP problem
+    * Like the total number of ways
+    * Find min or max - from multiple ways to do this but you have to tell what is going
+    on - either minimum or maximum output
+
+- Try out all possible ways(count, best way) comes in - Then we can apply recursion
+
+**** ShortCut to apply recursion on DP problems:
+1) Try to represent the problem in terms of index
+2) Do possible stuff on that index according to the problem statement
+3)
+    a) Sum up all the stuff --> Count all ways (If questions say like this)
+    b) Minimum among the stuff --> Take minimum among the stuff
+    c) Maximum among the stuff --> Take maximum among the stuff
+
+* Start with recursion, then try to see if we can apply memoization. Then try to convert
+memoization + recursion code to tabulation form. Then finally do space optimization on
+tabulation form.

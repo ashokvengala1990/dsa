@@ -1,0 +1,57 @@
+0/1 Knapsack:
+- Support we are given a bab/knapsack with a fixed capacity, along with some items' weights and profits, we recap by choosing to
+put that item in the bag. We want to maximum the profit while also ensuring that our backpack doesn't run out of the space. The
+reason this algorithm is called 0/1 at each point, we can either choose to include an item or not include it - a binary decision.
+    Q: Given the list of N items, and a backpack with a limited capacity, return the maximum total profit that can be contained in
+    the backpack. The i-th item's profit is profit[i] and its weight is weight[i]. Assume you can only add each item to the bag at
+    most once.
+
+- You first instinct might just be to be greedy and pick the items with the most profit. However, we might not get the maximum profit
+this way because capacity might become a bottle neck, e.g. the items with the highest profits might be the heaviest. So, given C = 8
+profit = [4, 4, 7, 1] and weight = [5, 2, 3, 1], we can choose to include or exclude each item. Following the same pattern from our
+beginners course, we can construct a decision tree, as shown below. C represents the capacity of our bag at any given point, the
+numbers in red represent the weight and the numbers in blue represent the total profit.
+
+- Example where Greedy fails and DP wins
+profits = [100, 90, 60]
+weights = [50, 25, 25]
+capacity = 50
+
+Greedy:
+- Sort by profit
+Profit     Weight
+100         50
+90          25
+60          25
+
+- Greedy pick:
+    * Pick item 1 -> weight = 50  -> done
+    Total Profit = 100
+
+DP approach:
+- Try all that sum to weight <= 50
+1) Item 2 + 3 -> weight = 25 + 25 -> profit = 150
+2) Item 1 -> weight = 50 -> profit = 100
+3) Any other combo is worse
+
+DP gives profit = 150
+Greedy gives profit = 100
+
+======> Implementation
+- When we start thinking about the code implementation, our base case will be when i == len(profit). This makes sense because if we exhaust all
+items, there isn't anything to return. Then, as mentioned previously, we can either skip the item or include the item. If we skip the item, we
+don't have to worry about capacity overflow, or the profit.
+- In the case that we choose to include the item, we must calculate the new capacity and only include the item if including this item will not
+result in a capacity overflow. We can then calculate the profit by going down that branch in the decision tree, the recursive call to which will
+be called with the new, updated capacity each time. Since we want to maximize our profit, we can take the maximum of two profits calculated, i.e.
+if our maxProfit was gained by skipping i or including i.
+
+
+
+
+
+
+
+
+
+

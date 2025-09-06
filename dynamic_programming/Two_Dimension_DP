@@ -1,0 +1,48 @@
+Let's consider a problem where the result of sub-problems depend on two variables. This is where two-dimensional dynamic programming comes into play.
+
+Q. Count the number of unique paths from the top left to the bottom right. You are only allowed to move down or to the right
+
+public static int bruteForce(int row, int col, int rows, int cols) {
+    if(row == rows || col == cols) {
+        return 0;
+    } else if(row == rows-1 && col == cols-1) {
+        return 1;
+    }
+
+    int down = bruteForce(row+1, col, rows, cols);
+    int right = bruteForce(row, col+1, rows, cols);
+
+    return down+right;
+ }
+
+- The issue with this approach is that because we have to go down and right to calculate a value at every single coordinate.
+We will also end up visiting the same coordinate multiple times.
+- For small inputs this is not a problem, but as the input size grows, the number of recursive calls will grow exponentially.
+- The time complexity of the brute force approach is O(2^(n+m), where n is the number of rows and m is the number of columns.
+
+Dynamic Programming:
+- Let us now see how we can make use of DP to save us some extra work we perform in the brute-force solution.
+
+public static int memoization(int row, int col, int rows, int cols, int[][] cache) {
+    if(row == rows || col == cols) {
+        return 0;
+    } else if(row == rows-1 && col == cols-1) {
+        return 1;
+    } else if(cache[row][col] > 0) {
+        return cache[row][col];
+    }
+
+    int down = memoization(row+1, col, rows, cols, cache);
+    int right = memoization(row, col+1, rows, cols, cache);
+
+    return cache[row][col] = down + right;
+}
+
+- In this cae, we introduce a cache parameter, which stores the number of unique paths from a given coordinate. This saves us
+ton of unnecessary work.
+
+- We can solve this problem using bottom-up approach (iterative approach). In this approach, we can start from the bottom right
+and work our way up to the top left. The time complexity will still be the same, except this is an iterative approach. The order
+in which we perform these calculations is super important. We have to calculate these values from right to left, and this is
+because we can only get a return value when we hit a base case.
+
