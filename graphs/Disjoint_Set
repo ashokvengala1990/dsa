@@ -1,0 +1,29 @@
+Disjoint Set:
+* Can you tell if v1 and v2 are part of the connected component?
+* Does v1 and v2 belongs to same component or not?
+* Dynamically changing the graph: You use DisjointSet data structures
+
+* We have two methods:
+    - findParent
+    - union():
+        * rank
+        * size
+    Note:
+    We do path reduction or compression
+
+* Union(u, v):
+    1) Find ultimate parent of u & v: pu, pv
+    2) Find rank of pu, pv
+    3) Connect smaller rank to larger rank always or connect smaller size to larger size always
+
+
+Problems on Disjoint Set:
+- Number of Provinces Leetcode
+- Number of operations to make network connection Leetcode
+- Accounts merge Leetcode
+- Number of islands II Leetcode
+- Making a large island Leetcode
+
+
+
+

@@ -1,0 +1,420 @@
+- LinkedList and Trees are kinds of Graphs
+- Made up of nodes or vertices, edges or pointers
+- Edges are directionals or bi-directional
+- E <= V^2, E is the total number of edges and V is the total of number of vertices
+- For every vertex, an edge can go to other vertices (V-1) and edge itself
+- Cycles is possible in graphs
+- Directed graph vs Undirected graph
+- By default edge weight is considered as 1 weight if explicitly if it is not mentioned
+
+- We can represent graph using three ways
+    1) Matrix
+    2) Adjacency Matrix
+    3) Adjacency List
+    Most common ones are used in interview are 1 and 3 options
+
+    1) Matrix:
+        - It is a 2D array, rows and columns to represent 2D array
+        - Values in the 2D represents the nodes and allowed to move 4 or 6 directions
+        - How this is represented as graph?
+            * You are allowed to move in four directions at every cell in 2D or in some case
+               you are allowed to move in six directions at every cell
+            * Typically, it is undirected graph
+    2) Adjacency Matrix:
+        - Dimensions of matrix represents the node
+        - adjMatrix[v1][v2] = 1, an edge exists from v1 to v2
+        - adjMatrix[v2][v1] = 1, an edge exists from v2 to v1
+        - It occupies lot of space in this matrix
+    3) Adjacency List:
+        -
+        Python Example:
+        class GraphNode:
+            def __init__(self, val):
+                self.val = val
+                self.neighbors = []
+
+        Java Example:
+        class GraphNode {
+            int val;
+            List<GraphNode> neighbors;
+
+            GraphNode() {
+                this.val = -1;
+                this.neighbors = new ArrayList<>();
+            }
+
+            GraphNode(int _val, List<GraphNode> _neighbors) {
+                this.val = _val;
+                this.neighbors = _neighbors;
+            }
+        }
+
+        For Adjacency list: In coding interviews, we usually use HashMap: key : node, value: List of Neighbors, it means list of nodes
+        HashMap<Node, List<Node>> or Hashmap<Integer, List<Integer>> adjList;
+
+    * Matrix DFS:
+      - To traverse all of the positions within a matrix, we can use Depth First Search (DFS), similar to how we would traverse a tree.
+      In a matrix, we can move in all 4 directions, up, down, left, and right. Sometimes we can also move diagonally, but for the sake
+      of simplicity, we will only consider the four directions in this lesson.
+      Q: Count the unique paths from the top left to the bottom right. A single path may only move
+       along 0's and can't visit the same cell more than once.
+       - TC: 4^(n*m), where n is the number of rows and m is the number of columns
+       - SC: O(n*m), Recursive call stack and Visited Array, where n is the number of rows and m is the
+         number of columns.
+
+       * Similar to backtracking. DFS is recursive in nature and we will be using recursion for this.
+       * Firstly, we need to think of our base case(s). Well, we know that we can move in all 4 directions (horizontally and vertically)
+       * We will have to try every path using backtracking since at any point in our path, we might not have a valid way to reach the
+         bottom right, in which case, we will have to backtrack.
+       * Since we are trying to find the number of unique paths, we need to keep count of the valid paths from each vertex.
+       * The base cases:
+            1. A unique path does not exist:
+                - Since we are allowed to move in all 4 directions, it is possible that during our traversal, we end up going out of
+                bounds. This means either our column, c , or our row, r becomes negative, or goes beyond the length of our matrix.
+                It does not matter which of r and c goes out of bounds because we need a valid c AND a valid r to perform our search.
+                We cannot perform a search on matrix[-1][3].
+                - If we have already visited a coordinate this is also a base case. We do not want to count the same path multiple times.
+                - If the current coordinate is 1, then a valid path does not exist through that coordinate, since we are not allowed to
+                move through 1's.
+            Since a valid path does not exist in all of the aforementioned cases, we will return 0, which denoates absence of a unqiue
+            path.
+            2. A unique path does exist:
+                - If we have reached the right-most column and the bottom-most row, it must be the case that we have found a valid path.
+                In this example, our definition of a valid path is if a path exists from matrix[0][0] to matrix[3][3].
+            In this case we return 1 and this will be added to the total number of valid paths.
+       * Implementation:
+            - To ensure that we don't visit a coordinate more than once, we use a hash set to keep track of the visited coordinates.
+                * A hash set is preferable over a list because we can insert and lookup coordinates in O(1) time. Alternatively we could
+                have used a 2D boolean array of the same size as our grid to keep track of visited coordinates.
+            - At any given coordinate r, c, we can recursively perform our DFS on (r+1, c), (r-1, c), (r, c+1), and (r, c-1). If our
+            recursive call returns 1, it will be added to our count and if it returns 0, adding it to the count will not affect the count.
+            - As we backtrack we make sure to remove the current coordinate from our visit hashset. This way, we can ensure to visit them
+            again, but take a different direction and explore it a valid path exists from that direction.
+
+       In Summary:
+       To visualize the above on our matrix, we can break down our algorithm into finding the initial unique path, and then backtracking to
+       find another potential unique path.
+            1) Find the first unique path
+            2) Backtrace to find another potential unique path
+
+
+    * Matrix BFS:
+      - Breadth-first search (BFS) can also be run on a matrix and is most commonly used to find the shortest path in a graph.
+      - BFS on a graph is very similar to BFS on a tree, but with a few more edge cases and a different setup. Once again, we will
+      only allow ourselves to move in 4 directions (horizontally and vertically).
+      Q: Find the length of the shortest path from the top left of the grid to the bottom right.
+        - We can also use DFS to accomplish this but BFS is more efficient.
+        - TC: O(n*m), where n is the number of rows and m is the number of columns
+        - SC: O(n*m) because of Queue and Visited Array
+      - Similar to the previous less, we take the dimensions of our grid, which tells us where our bounds are. We will use a hash
+      set to keep track of visited vertices. We will use a double ended queue to keep track of all visited vertices at each level
+      and keep track of the current level.
+      - We can initialize our queue to the first vertex, (0, 0) and mark it as visited. This is our starting point.
+      - We are asked to find the length of the shortest path.
+        * After our initial set up, we can initialize a length variable to 0. Then, just like BFS on trees, we can loop through our
+        queue, level by level.
+        * Here, when we pop from our queue, we get a r (row) and c (column). With trees, the next step was to visit the children of
+        the popped node. Here, we visit the neighbors of the popped vertex. Here, we visit the neighbors of the popped vertex. We will
+        continue this until we reach the target position which is at the bottom right of the grid.
+        * To compute the positions of the 4 adjacent cells we can use an array neighbors = [[0,1],[0,-1],[1,0],[-1,0]].
+        * Though this array does not technically store the positions of the neighbors, the array does represent the directions we can
+        move in - right, left, up, down, respectively. All we need to do is add the direction to the current positon to get the new
+        position.
+        * The code in the inner most if statement is the same as what we had in DFS. If we are out of bounds, the coordinate is blocked
+        or the vertex is already visited, we continue to the next iteration.
+        * Otherwise, we append all the neighbors to the queue and add them to the hashset to ensure we don't visit them again. Notice
+        how we add to the hashset as soon as we append to the queue. This way, we will never have the same element occur twice in our
+        queue, which helps in making it more efficient in time complexity, which we will discuss later.
+      - TC:
+            * Since we are never visiting a coordinate twice, in the worst case, we end up visiting each coordinate at most once. If n
+            is the number of rows and m is the number of columns, this gives us a time complexity of O(n*m).
+      - SC:
+            * The space complexity is O(n*m) as well. This is because we are storing all the vertices in the queue and the hash set.
+            The queue can have at most n * m vertices and the hash set can also have at most n * m vertices.
+
+
+    - Adjacency List:
+      * Option 1: GraphNode used for adjacency list
+            public class GraphNode {
+                int val;
+                List<GraphNode> neighbors;
+                GraphNode(){}
+                GraphNode(int val) {
+                    this.val = val;
+                    this.neighbors = new ArrayList<>();
+                }
+            }
+
+      * Option 2: Use a HashMap
+            Map<String, List<String>> adjList = new HashMap<>();
+        Refer to example in Count_Unique_Paths_Adjacency_List_DFS.java file
+
+      * We can use GraphNode class to manage the graph data structure and we call it as Adjacency list in this
+      * In coding interviews, we can use HashMap to hold the graph nodes and its edges. Where key is a node and value is
+        List of neighbors.
+
+      * Example 01:
+            - We wanted to count the number of paths that lead from a source to destination
+            - We have an adjacency list, a source, and a target. Similar to matrix traversal, we will make use of a hashset
+              called visit to keep track of the vertices that we have already visited.
+            - We will then recursively run DFS on our list until we reach the target node, after which we will return 1. Once
+            we have found a path, we will backtrack by removing nodes from our list and return the count.
+
+      * Using DFS approach:
+         - TC: O(n^v)
+         - SC: O(v)
+      * Using BFS approach:
+         - TC: O(v+e)
+         - SC: O(v)
+
+========================> Dijkstra's Algorithm:
+- Having already covered BFS, we will now cover another shortest path algorithm  Dijkstra's algorithm. The downside of using BFS is
+that it only works when the graph is unweighted - i.e. where the default weight of each edge is 1.
+- If we are given the following unweighted graph: edges = [[A,B],[A,C],[B,D],[C,B],[C,D],[C,E],[D,E]], and are asked to find the shortest
+path from A (source node) to D (destination node), we can apply classic BFS and keep adding the weights until we get to D.
+- Because all the weights are the same, BFS gives the shortest path in terms of the amount of vertices we visit. However, this fails
+when we have different weights for different edges as shown below.
+- Dijkstra's algorithm is used to find the shortest path to all nodes in a weighted graph. It is similar to BFS, except it operates on
+weighted graphs. Because Dijkstra's algorithm operates on different weights, it will prioritize finding the shortest path such that the
+path to each destination is the "lightest".
+- In other words, BFS does not revisit nodes but Dijkstra will, if it finds a shorter path (in terms of weight)
+
+- Q) Starting from A, find the length of the shortest path to every other node.
+Given the previous weighted graph, and a source vertex, A, we want to find the shortest paths from A to every other vertex in our graph.
+It should be noted that when we say "shortest", it means "lightest", i.e. paths that have the smallest total weight (the sum of the weight
+for the edges on the path).
+
+- Dijkstra's algorithm is a classic example of a greedy algorithm. A greedy algorithm makes the optimal choice at each step, meaning it selects
+the best option available at each step. In this case, the smallest weight.
+- Since we are choosing the path with the minimum weight, a min-heap is the perfect data structure here. Each "node" in the min-heap will contain
+the node letter and the cost associated with that node, like <cost, node>.
+- Notice that cost is the first element in the tuple. This is because we want to sort the min-heap by the cost.
+- Since we are optimizing for the shortest path, it might be the case that we have to add the same vertex many times to get the shortest possible
+path. We will also declare a hashmap to map our vertices and their respective shortest paths.
+- The visual below demonstrates the step-by-step process of how the min-heap implementation works to find the shortest path. We always pop the node
+with the lowest cost.
+
+Algorithm:
+1. Build adjacency list:
+    - Create a hashmap adj where:
+        - key = vertex
+        - Value = list of pairs (neighbor, weight)
+    - For each edge (s, d, w), and (d, w) to adj[s]
+    - (If undirected, also add (s, w) to adj[d])
+
+2. Initialize shortest-path map:
+    - Create a hashmap shortest to store vertices and their shortest known distance from the source.
+    - Initialize empty
+    - This map will be the final output.
+
+3. Initialize min-heap (priority queue):
+    - Push (src, 0) into the heap (the source vertex with distance 0)
+
+4. Process the heap until empty:
+    - While the min-heap is not empty:
+        a. Pop the vertex with the smallest distance
+        b. If the vertex is already in shortest (visited), skip it.
+        c. Otherwise, record its distance in shortest.
+
+5. Explore neighbors:
+    - For each neighbor (n, w) of the current vertex:
+        * If n is not yet in shortest, push (n, current_distance + w) into the heap.
+
+6. Continue until heap is empty:
+    - Repeat popping and exploring until all reachable vertices are processed.
+
+7. Return result:
+    - The hashmap shortest contains the shortest distance from the source to all vertices.
+
+Time Complexity
+The time complexity for this algorithm can be written as O(E logE), where E is the number of edges. Recall that in the worst case, each vertex
+is connected to the other, i.e. V^2. In the worst case, we might have every single edge inside of our heap. Since insertion and removal from a
+heap is logN, this gives us a total of O(E logE).
+
+Closing Notes
+You might have noticed that the graph we were operating on does not contain any negative weights. This is actually one of the weaknesses of Dijkstra.
+It cannot handle negative weights. This makes sense because in the graph above, we assumed that there couldn't exist a path to C through A -> B
+because A -> C = 3 and A -> B = 10. Knowing that A -> B is "heavier" than A -> C, a shorter path to C, through B is not possible under Dijkstra.
+However, what if we have a negative weight such that we could find a path to C even shorter than 3
+3? For this, there is another algorithm - Bellman-Ford Shortest Path Algorithm. We will not cover this algorithm in our course but here is a
+NeetCode Youtube video that explains it, if that is something that interests you.
+
+====> Note
+- If don't have weights on edges in a graph, then its edge weight is considered as 1. We can apply BFS for this type of graph
+- If we have weights on edges (in general not with 1), then we need to apply Dijkstra's shortest path algorithm. And it should not Negative weights
+on edges in a graph.
+- In other words, BFS does not revisit nodes but Dijkstra will, if it finds a shorter path (in terms of weight)
+- Question: Find the shortest path from src to every other node in the graph. There are n nodes in the graph.
+- We use MinHeap and HashMap (or Array: - Use HashMap or Array to maintain the cost to reach a node from source node) to apply Dijkstra's algorithm.
+- Greedy Algorithm
+- Data Structures used in Dijkstra Algorithm==>
+    1) Initialize adjacency list
+    2) Convert edges into adjacency list
+    3) Declare HashMap (shortest) to store cost to reach for every node from source and minHeap with (0, src) (minHeap)
+    4) Iterate minHeap till is not an empty: another way to check is shortest.size() < n (assuming that graph is connected)
+        4.1) pop the element from minHeap and map to w1 and n1 variables
+        4.2) if n1 is already visited and check in shortest variable, if so, continue your to next iteration. Otherwise, add cost to shortest for that node
+        4.3) Visit adjacent neighbors for that node by pulling adj node with adj.get(n1), then check neighbors are not visited and if so, add to minHeap
+        with cost = w1 + w2 and node n2. otherwise, move to next iteration for the next neighbor.
+    5) Return shortest map object
+- TC: O(E*logV) , O(E*logE) is also correct.
+- SC: O(E)
+
+
+========================> Prim's (Minimum Spanning Tree (MST):
+- It is used to find the Minimum Spanning Tree of weighted undirected connected graph.
+- It must be Undirected Connected Graph and has to be Acyclical. Graph can't have a cycles.
+- We are given a graph and we want to take subset of edges that form a tree, such that it has minimize the total cost
+    * It will be directed edges
+    * No Cycles
+    * Basically it will be covered to tree representation by taking subset of edges that form a tree. so, it must minimum the total
+    cost
+    * Ensure that all vertices still exits in MST while building it. But we will n-1 edges for N nodes in order to have Acyclical and also
+    it must be connected and minimum total cost.
+
+Rules for MST:
+- Must have no Cycles
+- Must minimize the total cost
+- N nodes with (N-1) edges
+
+- It doesn't really matter where we start in case of Prim's algorithm. We can start from any node and this algorithm ensures that
+  all nodes are picked in the final solution of Minimum Spanning Tree (MST, AKA Prim's).
+- Questions can be asked either:
+    1) Find the cost of the Minimum Spanning Tree (MST).
+    2) Find the actual Minimum Spanning Tree (MST) itself (find list of edges for the MST). It basically another graph without cycles. There can be
+    multipe MST but we return single MST.
+
+
+Algorithm:
+- MinHeap <weight, n1, n2> : weight between n1 and n2 nodes
+- Visit (HashSet): it is keeping track of number of nodes
+ - MST (List<int[]) answer: it is keeping track of number of edges
+
+- Build adjacency list from edges
+- Then, starting from any node, take all neighbors from that node and add to minHeap data structure.
+
+- We can rely either one of them:
+    1) not minHeap.isEmpty()
+    2) visited.size() <= n
+    3) MST.size() <= n-1
+- visited ds is keeping track of number of nodes.
+- mst ds is keeping track of number of edges.
+
+
+Dijkstra's Algorithm:
+- Find the shortest path from a source node to all remaining nodes in the graph
+
+
+Note:
+MST is about total cost to minimize with the all nodes and (n-1) edges to form an MST, whereas Dijkstra's is about minimum cost
+from source to every destination nodes
+
+
+========================> Union-Find (Disjoint Sets):
+- Useful tool:
+    1) Find number of connected components
+    2) To find the Cycle detection
+    3) Can you check whether node 1 and node 2 are belongs to same component in constant time? For example, does 1 & 7 belong to same component?
+
+- It can deal with disconnected components and that is the strengths of the Union-Find.
+- DFS can also be used to accomplish these but Union-Find algorithm is helpful when graph is changing dynamically. DFS can be used
+when the graph is static-graph, where Union-Find can be used when the graph is changing or dynamic-graph.
+
+- Union-Find is a "Forest of Trees". It means bunch of trees in a graph.
+- If we have a balanced tree, then find operation is more efficiently done
+- UnionByRank: It means height
+- For every node, we maintain a parent. Initially it is marked as itself
+- For every node or tree, we want to keep track of rank which is also known as height
+- UnionFind doesn't accurately represent the graph. It is about "detecting the cycles" or "counting number of connected components".
+- UnionByRank(height): It means height.
+- Path compression in find function
+
+- For example: Determine if a graph has a cycle or not
+    edges: [[1,2],[4,1],[2,4]]
+
+- Example 02:
+    [[1,2],[2,3],[4,5],[6,7],[5,6],[3,7]]
+
+- It can be implemented below functions:
+    1) findParent()
+    2) Union can be done in two approaches:
+        2.1) rank
+        2.2) size
+
+- Initialize parent array to itself and rank array with all zeros:
+    parent: [1,2,3,4,5,6,7]
+             1,2,3,4,5,6,7
+    rank:[0,0,0,0,0,0,0]
+          1,2,3,4,5,6,7
+
+- Union(u,v):
+    1) Find ultimate parent of u & v, pu , pv respectively.
+    2) Find rank of pu, pv.
+    3) Connect smaller rank to larger rank always.
+
+- Initialize parent array to itself and size array with all ones:
+    parent: [1,2,3,4,5,6,7]
+             1,2,3,4,5,6,7
+    size: [1,1,1,1,1,1,1]
+          [1,2,3,4,5,6,7]
+
+========================> Kruskal's (Minimum Spanning Tree):
+- It is another greedy algorithm which is similar to Dijkstra's and Prims's algorithm
+- Rules for MST:
+  - Must have no Cycles
+  - Must minimize the total cost
+  - N nodes with (N-1) edges to form the MST
+
+- Both Prim's and Kruskal's algorithms find a Minimum Spanning Tree (MST) — and an MST is defined only for connected graphs, because:
+    * An MST must connect all vertices with the minimum total edge weight.
+- If the graph is disconnected, there is no single spanning tree that includes all nodes.
+- It can be directed or undirected but most of the cases ensure it has to be undirected. If you are given directed, converted to undirected edges
+by considering minimum edges between u and v (u->v and v->u). This Krukal's algorithms great but prims need to very careful when adding initial edges
+to minHeap (have to try both directions and carefully examine the edges)
+
+-
+
+========================> Topological Sort
+1) Graph Type Requirement:
+    - Must be a Directed Graph.
+    - Works primarily on Directed Acyclic Graphs (DAGs).
+    - If a graph has a cycle, normal topological sort fails. You can still attempt it, but you need cycle detection to avoid infinite loops.
+2) Disconnected graphs:
+    - If the graph has multiple disconnected components, the order between them does not matter.
+    - Topological sort can be run on each component independently.
+3) Implementation Approaches:
+    - DFS-Based (Depth-First Search):
+        * Use post-order traversal
+        * Use a visited set to track nodes
+        * Reverse the output list at the end to get the correct topological ordering.
+        * Optional: reversing depends on how the problem defines dependencies.
+    - BFS-Based (Khan's Algorithm):
+        * Use in-degree counts.
+        * Nodes with in-degree 0 are processed first.
+        * Continue until all nodes are processed.
+4) Handling cycles:
+    - Detect cycles using an additional set (or recursion stack) in DFS.
+    - If a node is revisited in the same DFS path, it forms a cycle.
+    - Normal topological ordering cannot exist for a graph with cycles.
+    - What if input is given as directed cycle graph?
+        * We need to use another hashSet to detect whether that node is already visited or not in that path
+5) Applications:
+    - Course Scheduling: Determine the order to take courses given prerequisites.
+    - Dependency Resolution: Software/library/package build orders.
+    - Task Scheduling: Tasks with prerequisite tasks.
+
+Revision Tip
+- Remember DAG + DFS/BFS + cycle detection if needed.
+- Post-order + reverse = common DFS trick.
+- Kahn’s Algorithm is neat for BFS-based solutions.
+
+
+
+
+DFS
+BFS
+Dijkatra Algorithm
+Prims
+Krushals
+Union Find
+Topoloical Sorting

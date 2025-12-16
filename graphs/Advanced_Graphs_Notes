@@ -1,0 +1,24 @@
+=================== Dijkstra's (Shortest Path):
+- When we want to find the shortest path for the given graph with weight edges, we use Dijkstra's algorithm
+- When we want to find the shortest path for the given graph with un-weighted edges, we use BFS algorithm
+- This is similar to BFS algorithm
+- Assuming that weights on edges must be positive. Dijkstra's algorithm doesn't works when a graph has negative
+  edges.
+- There is a possibility of having cycles in the graph.
+
+Q) Starting from A, find the length of the shorted path to every other node.
+- Use MinHeap, <cost, node>
+- Output: HashMap<String, Integer>, key: node, value: minimum cost
+- Graph with V vertices or nodes
+    * Maximum number of edges V^2 = E, every single node is connected to other nodes
+    * As push and pop elements = number of edges
+    * How many times we push and pop edges: In worst case: O(E*logE)
+    * Some times, people write like: O(E * log V^2) = O(2 * E * logV) = O(E * logV)
+
+=================== Prim's (Minimum Spanning Tree)
+- This algorithm helps us to find the minimum spanning tree in an undirected graph.
+- Undirected Connected Graph
+- Minimum Spanning Tree must be Acyclical, It must not have a cycle.
+- Total cost is minimize by choosing the edges and forming a graph without cycle
+- N is the number of nodes and we can have maximum (N-1) edges to avoid cycles, then we can consired as Minimum Spanning Tree
+- N nodes and (N-1) edges

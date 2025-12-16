@@ -1,0 +1,28 @@
+Definition of Minimum Spanning Tree (MST):
+- A tree in which we have N nodes & N-1 edges & all nodes are reachable from each other.
+- Undirected Weight graph
+- N nodes and M edges can be any number of nodes and edges
+- Definition of MST is:
+    * A tree in which we have N nodes & N - 1 edges & all nodes are reachable from each other.
+    * Questions:
+        1) You may need to find the MST SUM
+        2) You may need to find the MST edges
+    * You can have more than one MST tree but one of the tree is called as MST.
+    * How do we find the MST of the given graph?
+        - Two algorithms can be used to find the MST:
+            * Prim's Algorithm
+            * Kruskal'a algorithm: Using Disjoint Set
+
+1) Prim's Algorithm:
+    * PriorityQueue
+    * Visited
+
+2) Kruskal'a algorithm:
+    - Using DSU
+    - Sort the input edges according to weight
+
+
+Problems on MST:
+- Find the MST sum
+- Find the MST edges
+-  Min Cost to Connect All Points Leetcode
