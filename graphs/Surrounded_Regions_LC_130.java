@@ -64,17 +64,342 @@ E = 4 × V (each cell has up to 4 neighbors)
 
 ====> Final Summary:
 Version	Traversal	Uses Recursion	Data Structure	Notes
-solve0	DFS	            ✅ Yes	        None	    Easiest but risks stack overflow
-solve1	DFS	            ❌ No	        Stack	    Safe for large boards
-solve2	BFS	            ❌ No	        Queue	    Most balanced and reliable
-
+solve0	DFS	                ✅ Yes	        None	    Easiest but risks stack overflow
+solve1	DFS	                ❌ No	        Stack	    Safe for large boards
+solve2	BFS	                ❌ No	        Queue	    Most balanced and reliable
+solve3  BFS (Multi-Source)  ❌ No           Queue       Most balanced and reliable
  */
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Stack;
+import backtracking.NQueens_LC_51;
+
+import java.util.*;
 
 public class Surrounded_Regions_LC_130 {
+    class Revision03 {
+        public void solve1(char[][] board) {
+            if(board == null || board.length == 0) {
+                return;
+            }
+
+            int rows = board.length, cols = board[0].length;
+            Queue<int[]> queue = new LinkedList<>();
+
+            for(int col = 0; col < cols; col++) {
+                if(board[0][col] == 'O') {
+                    board[0][col] = 'S';
+                    queue.offer(new int[]{0, col});
+                }
+
+                if(board[rows-1][col] == 'O') {
+                    board[rows-1][col] = 'S';
+                    queue.offer(new int[]{rows-1, col});
+                }
+            }
+
+            for(int row = 0; row < rows; row++) {
+                if(board[row][0] == 'O') {
+                    board[row][0] = 'S';
+                    queue.offer(new int[]{row, 0});
+                }
+
+                if(board[row][cols-1] == 'O') {
+                    board[row][cols-1] = 'S';
+                    queue.offer(new int[]{row, cols-1});
+                }
+            }
+
+            while (!queue.isEmpty()) {
+                int[] curr = queue.poll();
+                int row = curr[0], col = curr[1];
+
+                for(int[] neighbor: offsetNeighbors) {
+                    int neiRow = row + neighbor[0], neiCol = col + neighbor[1];
+
+                    if(isValid(neiRow, neiCol, rows, cols) && board[neiRow][neiCol] == 'O') {
+                        board[neiRow][neiCol] = 'S';
+                        queue.offer(new int[]{neiRow, neiCol});
+                    }
+                }
+            }
+
+            for(int row =0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(board[row][col] == 'O') {
+                        board[row][col] = 'X';
+                    } else if(board[row][col] == 'S') {
+                        board[row][col] = 'O';
+                    }
+                }
+            }
+        }
+
+        private boolean isValid(int row, int col, int rows, int cols) {
+            return row >= 0 && row < rows && col >= 0 && col < cols;
+        }
+
+        private static final int[][] offsetNeighbors = {{-1, 0},{0, 1},{1, 0},{0, -1}};
+
+        private void dfs(int row, int col, char[][] board) {
+            board[row][col] = 'S';
+
+            for(int[] neighbor: offsetNeighbors) {
+                int neiRow = row + neighbor[0], neiCol = col + neighbor[1];
+
+                if(isValid(neiRow, neiCol, board.length, board[0].length)
+                        && board[neiRow][neiCol] == 'O') {
+                    dfs(neiRow, neiCol, board);
+                }
+            }
+        }
+
+        public void solve0(char[][] board) {
+            if(board == null || board.length == 0) {
+                return;
+            }
+
+            int rows = board.length, cols = board[0].length;
+
+            for(int col = 0; col < cols; col++) {
+                if(board[0][col] == 'O') {
+                    dfs(0, col, board);
+                }
+
+                if(board[rows-1][col] == 'O') {
+                    dfs(rows-1, col, board);
+                }
+            }
+
+            for(int row = 0; row < rows; row++) {
+                if(board[row][0] == 'O') {
+                    dfs(row, 0, board);
+                }
+
+                if(board[row][cols-1] == 'O') {
+                    dfs(row, cols-1, board);
+                }
+            }
+
+
+            for(int row =0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(board[row][col] == 'O') {
+                        board[row][col] = 'X';
+                    } else if(board[row][col] == 'S') {
+                        board[row][col] = 'O';
+                    }
+                }
+            }
+        }
+    }
+
+    class Revision02 {
+        public void solve3(char[][] board) {
+            if (board == null || board.length == 0) {
+                return;
+            }
+
+            int rows = board.length, cols = board[0].length;
+            boolean[][] visited = new boolean[rows][cols];
+            Queue<int[]> queue = new LinkedList<>();
+
+            for(int row = 0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if((row == 0 || col == 0 || row == (rows-1) || col == (cols-1)) && board[row][col] == 'O') {
+                        queue.offer(new int[]{row, col});
+                        visited[row][col] = true;
+                    }
+                }
+            }
+
+            while (!queue.isEmpty()) {
+                int[] curr = queue.poll();
+                int currRow = curr[0], currCol = curr[1];
+
+                for(int[] neighbor: offsetNeighbors) {
+                    int neiRow = currRow + neighbor[0], neiCol = currCol + neighbor[1];
+
+                    if(neiRow >= 0 && neiRow < rows && neiCol >= 0 && neiCol < cols
+                            && board[neiRow][neiCol] == 'O' && !visited[neiRow][neiCol]) {
+                        queue.offer(new int[]{neiRow, neiCol});
+                        visited[neiRow][neiCol] = true;
+                    }
+                }
+            }
+
+            for(int row = 0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(board[row][col] == 'O' && !visited[row][col]) {
+                        board[row][col] = 'X';
+                    }
+                }
+            }
+        }
+
+        private void bfsUsingQueue(int row, int col, char[][] board, boolean[][] visited, int rows, int cols) {
+            if(board[row][col] == 'X' || visited[row][col]) {
+                return;
+            }
+
+            Queue<int[]> queue = new LinkedList<>();
+            queue.offer(new int[]{row, col});
+            visited[row][col] = true;
+
+            while (!queue.isEmpty()) {
+                int[] curr = queue.poll();
+                int currRow = curr[0], currCol = curr[1];
+
+                for(int[] neighbor: offsetNeighbors) {
+                    int neiRow = currRow + neighbor[0], neiCol = currCol + neighbor[1];
+
+                    if(neiRow >= 0 && neiRow < rows && neiCol >= 0 && neiCol < cols
+                            && board[neiRow][neiCol] == 'O' && !visited[neiRow][neiCol]) {
+                        queue.offer(new int[]{neiRow, neiCol});
+                        visited[neiRow][neiCol] = true;
+                    }
+                }
+            }
+        }
+
+        public void solve2(char[][] board) {
+            if (board == null || board.length == 0) {
+                return;
+            }
+
+            int rows = board.length, cols = board[0].length;
+            boolean[][] visited = new boolean[rows][cols];
+
+            for(int col = 0; col < cols; col++) {
+                // First row and for every column
+                bfsUsingQueue(0, col, board, visited, rows, cols);
+
+                // Last row and for every column
+                bfsUsingQueue(rows-1, col, board, visited, rows, cols);
+            }
+
+            for(int row = 0; row < rows; row++) {
+                // First column and for every row column
+                bfsUsingQueue(row, 0, board, visited, rows, cols);
+
+                // Last column and for every row column
+                bfsUsingQueue(row, cols-1, board, visited, rows, cols);
+            }
+
+            for(int row = 0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(board[row][col] == 'O' && !visited[row][col]) {
+                        board[row][col] = 'X';
+                    }
+                }
+            }
+        }
+
+        private void dfsUsingStack(int row, int col, char[][] board, boolean[][] visited, int rows, int cols) {
+            if(visited[row][col] || board[row][col] == 'X') {
+                return;
+            }
+
+            Stack<int[]> stack = new Stack<>();
+            stack.push(new int[]{row, col});
+            visited[row][col] = true;
+
+            while (!stack.isEmpty()) {
+                int[] curr = stack.pop();
+                int currRow = curr[0], currCol = curr[1];
+
+                for(int[] neighbor: offsetNeighbors) {
+                    int neiRow = currRow + neighbor[0], neiCol = currCol + neighbor[1];
+
+                    if(neiRow >= 0 && neiRow < rows && neiCol >= 0 && neiCol < cols
+                            && board[neiRow][neiCol] == 'O' && !visited[neiRow][neiCol]) {
+                        stack.push(new int[]{neiRow, neiCol});
+                        visited[neiRow][neiCol] = true;
+                    }
+                }
+            }
+        }
+
+        public void solve1(char[][] board) {
+            if (board == null || board.length == 0) {
+                return;
+            }
+
+            int rows = board.length, cols = board[0].length;
+            boolean[][] visited = new boolean[rows][cols];
+
+            for(int col = 0; col < cols; col++) {
+                // First row and for every column
+                dfsUsingStack(0, col, board, visited, rows, cols);
+
+                // Last row and for every column
+                dfsUsingStack(rows-1, col, board, visited, rows, cols);
+            }
+
+            for(int row = 0; row < rows; row++) {
+                // First column and for every row column
+                dfsUsingStack(row, 0, board, visited, rows, cols);
+
+                // Last column and for every row column
+                dfsUsingStack(row, cols-1, board, visited, rows, cols);
+            }
+
+            for(int row = 0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(board[row][col] == 'O' && !visited[row][col]) {
+                        board[row][col] = 'X';
+                    }
+                }
+            }
+        }
+
+        private static final int[][] offsetNeighbors = {{-1, 0},{0, 1},{1, 0},{0, -1}};
+
+        private void dfsUsingRecursion(int row, int col, char[][] board, boolean[][] visited, int rows, int cols) {
+            if(row < 0 || row >= rows || col < 0 || col >= cols || visited[row][col] || board[row][col] == 'X') {
+                return;
+            }
+
+            visited[row][col] = true;
+
+            for(int[] neighbor: offsetNeighbors) {
+                int neiRow = row + neighbor[0], neiCol = col + neighbor[1];
+                dfsUsingRecursion(neiRow, neiCol, board, visited, rows, cols);
+            }
+        }
+
+        public void solve0(char[][] board) {
+            if(board == null || board.length == 0) {
+                return;
+            }
+
+            int rows = board.length, cols = board[0].length;
+            boolean[][] visited = new boolean[rows][cols];
+
+            for(int col = 0; col < cols; col++) {
+                // First row and for every column
+                dfsUsingRecursion(0, col, board, visited, rows, cols);
+
+                // Last row and for every column
+                dfsUsingRecursion(rows-1, col, board, visited, rows, cols);
+            }
+
+            for(int row = 0; row < rows; row++) {
+                // First column and for every row column
+                dfsUsingRecursion(row, 0, board, visited, rows, cols);
+
+                // Last column and for every row column
+                dfsUsingRecursion(row, cols-1, board, visited, rows, cols);
+            }
+
+            for(int row = 0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(board[row][col] == 'O' && !visited[row][col]) {
+                        board[row][col] = 'X';
+                    }
+                }
+            }
+        }
+    }
+
     class Revision01 {
         // Directions: up, right, down, left
         private static final int[][] offsetNeighbors = {{-1,0},{0,1},{1,0},{0,-1}};

@@ -21,6 +21,242 @@ Input is an adjacency matrix, and we need to do traversal differently compared t
  */
 
 public class Number_of_Provinces_LC_547 {
+    class Revision03 {
+        class DisjointSet {
+            private int[] parent, size;
+            private int noOfComponents;
+
+            DisjointSet(int n) {
+                parent = new int[n+1];
+                size = new int[n+1];
+
+                for(int i = 0; i <= n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+
+                noOfComponents = n;
+            }
+
+            public int findUltimateParent(int node) {
+                if(parent[node] == node) {
+                    return node;
+                }
+
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public boolean unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) {
+                    return false;
+                }
+
+                if(size[ulpu] < size[ulpv]) {
+                    parent[ulpu] = ulpv;
+                    size[ulpv] += size[ulpu];
+                } else {
+                    parent[ulpv] = ulpu;
+                    size[ulpu] += size[ulpv];
+                }
+
+                noOfComponents--;
+                return true;
+            }
+
+            public int getNoOfComponents() {
+                return noOfComponents;
+            }
+        }
+
+        public int findCircleNum(int[][] isConnected) {
+            int n = isConnected.length;
+            DisjointSet ds = new DisjointSet(n);
+
+            for(int u = 0; u < n; u++) {
+                for(int v = 0; v < n; v++) {
+                    if(isConnected[u][v] == 1) {
+                        ds.unionBySize(u, v);
+                    }
+                }
+            }
+
+            return ds.getNoOfComponents();
+        }
+    }
+
+    class Revision02 {
+        class DisjointSet {
+            int[] parent, size;
+            int numComponents;
+
+            DisjointSet(int n) {
+                this.parent = new int[n];
+                this.size = new int[n];
+
+                for(int i = 0; i < n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+                numComponents = n;
+            }
+
+            public int findUltimateParent(int node) {
+                if(node == parent[node]) {
+                    return node;
+                }
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public void unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) {
+                    return;
+                }
+
+                if(size[ulpu] < size[ulpv]) {
+                    size[ulpv] += size[ulpu];
+                    parent[ulpu] = ulpv;
+                } else {
+                    size[ulpu] += size[ulpv];
+                    parent[ulpv] = ulpu;
+                }
+
+                numComponents--;
+            }
+
+            public int getNumComponents() {
+                return numComponents;
+            }
+        }
+
+        public int findCircleNum3(int[][] isConnected) {
+            if(isConnected == null || isConnected.length == 0) {
+                return 0;
+            }
+
+            int size = isConnected.length;
+            DisjointSet ds = new DisjointSet(size);
+
+            for(int node = 0; node < size; node++) {
+                for(int neighborNode = 0; neighborNode < size; neighborNode++) {
+                    if(isConnected[node][neighborNode] == 1) {
+                        ds.unionBySize(node, neighborNode);
+                    }
+                }
+            }
+
+            return ds.getNumComponents();
+        }
+
+        private void bfsUsingQueue(int node, int[][] isConnected, boolean[] visited) {
+            Queue<Integer> queue = new LinkedList<>();
+            queue.offer(node);
+            visited[node] = true;
+
+            int size = isConnected.length;
+
+            while (!queue.isEmpty()) {
+                int currNode = queue.poll();
+
+                for(int neighborNode = 0; neighborNode < size; neighborNode++) {
+                    if(isConnected[currNode][neighborNode] == 1 && !visited[neighborNode]) {
+                        queue.offer(neighborNode);
+                        visited[neighborNode] = true;
+                    }
+                }
+            }
+        }
+
+        public int findCircleNum2(int[][] isConnected) {
+            int numProvinces = 0;
+            if(isConnected == null || isConnected.length == 0) {
+                return numProvinces;
+            }
+
+            int size = isConnected.length;
+            boolean[] visited = new boolean[size];
+
+            for(int node = 0; node < size; node++) {
+                if(!visited[node]) {
+                    bfsUsingQueue(node, isConnected, visited);
+                    numProvinces++;
+                }
+            }
+
+            return numProvinces;
+        }
+
+        private void dfsUsingStack(int node, int[][] isConnected, boolean[] visited) {
+            Stack<Integer> stack = new Stack<>();
+            stack.push(node);
+            visited[node] = true;
+
+            int size = isConnected.length;
+
+            while (!stack.isEmpty()) {
+                int currNode = stack.pop();
+
+                for(int neighborNode = 0; neighborNode < size; neighborNode++) {
+                    if(isConnected[currNode][neighborNode] == 1 && !visited[neighborNode]) {
+                        stack.push(neighborNode);
+                        visited[neighborNode] = true;
+                    }
+                }
+            }
+        }
+
+        public int findCircleNum1(int[][] isConnected) {
+            int numProvinces = 0;
+            if(isConnected == null || isConnected.length == 0) {
+                return numProvinces;
+            }
+
+            int size = isConnected.length;
+            boolean[] visited = new boolean[size];
+
+            for(int node = 0; node < size; node++) {
+                if(!visited[node]) {
+                    dfsUsingStack(node, isConnected, visited);
+                    numProvinces++;
+                }
+            }
+
+            return numProvinces;
+        }
+
+        private void dfs(int node, int[][] isConnected, boolean[] visited) {
+            visited[node] = true;
+
+            for(int neighborNode = 0; neighborNode < isConnected.length; neighborNode++) {
+                if(isConnected[node][neighborNode] == 1 && !visited[neighborNode]) {
+                    dfs(neighborNode, isConnected, visited);
+                }
+            }
+        }
+
+        public int findCircleNum0(int[][] isConnected) {
+            int numProvinces = 0;
+            if(isConnected == null || isConnected.length == 0) {
+                return numProvinces;
+            }
+
+            int size = isConnected.length;
+            boolean[] visited = new boolean[size];
+
+            for(int node = 0; node < size; node++) {
+                if(!visited[node]) {
+                    dfs(node, isConnected, visited);
+                    numProvinces++;
+                }
+            }
+
+            return numProvinces;
+        }
+    }
+
     class DisjointSet {
         private int[] parent, size;
         private int numComponents;

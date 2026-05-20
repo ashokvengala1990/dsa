@@ -32,7 +32,8 @@ public class Length_of_Shortest_Path_BFS_Concept {
 
                     for(int[] neighbor: offsetNeighbors) {
                         int newRow = row + neighbor[0], newCol = col + neighbor[1];
-                        if(newRow >= 0 && newCol >= 0 && newRow < ROWS && newCol < COLS && !visited[newRow][newCol] && grid[newRow][newCol] == 0) {
+                        if(newRow >= 0 && newCol >= 0 && newRow < ROWS && newCol < COLS
+                                && !visited[newRow][newCol] && grid[newRow][newCol] == 0) {
                             queue.offer(new int[]{newRow, newCol});
                             visited[newRow][newCol] = true;
                         }
@@ -42,7 +43,7 @@ public class Length_of_Shortest_Path_BFS_Concept {
                 length++;
             }
 
-            return length;
+            return -1;
         }
 
         public static void main(String[] args) {

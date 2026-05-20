@@ -12,6 +12,56 @@ import java.util.Queue;
  */
 
 public class Rotting_Oranges_LC_994 {
+    class Revision02 {
+        private static final int[][] offsetNeighbors = {{-1, 0},{0, 1},{1, 0},{0, -1}};
+        private static final int FRESH_ORANGE = 1, EMPTY = 0, ROTTEN_ORANGE = 2;
+
+        private boolean isValid(int row, int col, int rows, int cols) {
+            return row >= 0 && row < rows && col >= 0 && col < cols;
+        }
+
+        public int orangesRotting(int[][] grid) {
+            if(grid == null || grid.length == 0) {
+                return 0;
+            }
+
+            int rows = grid.length, cols = grid[0].length, freshOranges = 0, minutes = 0;
+            Queue<int[]> queue = new LinkedList<>();
+
+            for(int r = 0; r < rows; r++) {
+                for(int c = 0; c < cols; c++) {
+                    if(grid[r][c] == 2) {
+                        queue.offer(new int[]{r, c});
+                    } else if(grid[r][c] == 1) {
+                        freshOranges++;
+                    }
+                }
+            }
+
+            while (!queue.isEmpty() && freshOranges > 0) {
+                int levelSize = queue.size();
+
+                for(int i = 0; i < levelSize; i++) {
+                    int[] curr = queue.poll();
+                    int r = curr[0], c = curr[1];
+
+                    for(int[] neighbor: offsetNeighbors) {
+                        int nr = r + neighbor[0], nc = c + neighbor[1];
+
+                        if(isValid(nr, nc, rows, cols) && grid[nr][nc] == FRESH_ORANGE) {
+                            grid[nr][nc] = ROTTEN_ORANGE;
+                            freshOranges--;
+                            queue.offer(new int[]{nr, nc});
+                        }
+                    }
+                }
+                minutes++;
+            }
+
+            return freshOranges == 0 ? minutes : -1;
+        }
+    }
+
     class Revision01 {
         private static final int[][] offsetNeighbors = {{-1,0},{0,1},{1,0},{0,-1}};
 

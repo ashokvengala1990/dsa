@@ -12,6 +12,52 @@ https://leetcode.com/problems/walls-and-gates/description/
  */
 
 public class Walls_and_Gates_LC_286 {
+    class Revision01 {
+        private static final int[][] offsetNeighbors = {{-1, 0},{0, 1},{1, 0},{0, -1}};
+        private static final int WALL = -1, GATE = 0, EMPTY_ROOM = 2147483647;
+
+        private boolean isValid(int row, int col, int rows, int cols) {
+            return row >= 0 && row < rows && col >= 0 && col < cols;
+        }
+
+        public void wallsAndGates(int[][] gates) {
+            if(gates == null || gates.length == 0) {
+                return;
+            }
+
+            int rows = gates.length, cols = gates[0].length, distance = 1;
+            Queue<int[]> queue = new LinkedList<>();
+
+            for(int r = 0; r < rows; r++) {
+                for(int c = 0; c < cols; c++) {
+                    if(gates[r][c] == GATE) {
+                        queue.offer(new int[]{r, c});
+                    }
+                }
+            }
+
+            while (!queue.isEmpty()) {
+                int levelSize = queue.size();
+
+                for(int i = 0; i < levelSize; i++) {
+                    int[] curr = queue.poll();
+                    int r = curr[0], c = curr[1];
+
+                    for(int[] neighbor: offsetNeighbors) {
+                        int nr = r + neighbor[0], nc = c + neighbor[1];
+
+                        if(isValid(nr, nc, rows, cols) && gates[nr][nc] == EMPTY_ROOM) {
+                            gates[nr][nc] = distance;
+                            queue.offer(new int[]{nr, nc});
+                        }
+                    }
+                }
+
+                distance++;
+            }
+        }
+    }
+
     class Solution {
         private static final int[][] offsetDirections = {{-1,0},{0,1},{1,0},{0,-1}};
 

@@ -28,6 +28,178 @@ Global DFS (one pass)	Build full graph, find any cycle	✅	❌	O(V+E)	O(V+E)	Nee
 
 
 public class Redundant_Connection_LC_684 {
+    class Revision02 {
+        class UnionFind {
+            private int[] parent, size;
+            UnionFind(int n) {
+                parent = new int[n];
+                size = new int[n];
+                for(int i = 0; i < n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+            }
+
+            public int findUltimateParent(int node) {
+                if(parent[node] == node) {
+                    return node;
+                }
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public boolean unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) {
+                    return false;
+                }
+
+                if(size[ulpu] < size[ulpv]) {
+                    parent[ulpu] = ulpv;
+                    size[ulpv] += size[ulpu];
+                } else {
+                    parent[ulpv] = ulpu;
+                    size[ulpu] += size[ulpv];
+                }
+                return true;
+            }
+        }
+
+        public int[] findRedundantConnection3(int[][] edges) {
+            if(edges == null || edges.length == 0) {
+                return new int[]{};
+            }
+
+            int n = edges.length;
+            UnionFind uf = new UnionFind(n+1);
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+                if(!uf.unionBySize(u, v)) {
+                    return new int[]{u, v};
+                }
+            }
+
+            return new int[]{};
+        }
+
+        private boolean hasPathUsingBFSQueue(int srcNode, int dstNode, List<List<Integer>> graph, boolean[] visited) {
+            Queue<Integer> queue = new LinkedList<>();
+            queue.offer(srcNode);
+            visited[srcNode] = true;
+
+            while (!queue.isEmpty()) {
+                int currNode = queue.poll();
+
+                if(currNode == dstNode) {
+                    return true;
+                }
+
+                for(int neighbor: graph.get(currNode)) {
+                    if(!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        private boolean hasPath1(int srcNode, int dstNode, List<List<Integer>> graph, boolean[] visited) {
+            Stack<Integer> stack = new Stack<>();
+            stack.push(srcNode);
+            visited[srcNode] = true;
+
+            while (!stack.isEmpty()) {
+                int currNode = stack.pop();
+
+                if(currNode == dstNode) {
+                    return true;
+                }
+
+                for(int neighbor: graph.get(currNode)) {
+                    if(!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        stack.push(neighbor);
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public int[] findRedundantConnection1(int[][] edges) {
+            if(edges == null || edges.length == 0) {
+                return new int[]{};
+            }
+
+            int n = edges.length;
+
+            List<List<Integer>> graph = new ArrayList<>();
+            for(int i = 0; i <= n; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+                boolean[] visited = new boolean[n+1];
+
+                if(hasPath1(u, v, graph, visited)) {
+                    return new int[]{u, v};
+                }
+
+                graph.get(u).add(v);
+                graph.get(v).add(u);
+            }
+
+            return new int[]{};
+        }
+
+        private boolean hasPath(int srcNode, int dstNode, List<List<Integer>> graph, boolean[] visited) {
+            if(srcNode == dstNode) {
+                return true;
+            }
+
+            visited[srcNode] = true;
+
+            for(int neighbor: graph.get(srcNode)) {
+                if(!visited[neighbor] && hasPath(neighbor, dstNode, graph, visited)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public int[] findRedundantConnection0(int[][] edges) {
+            if(edges == null || edges.length == 0) {
+                return new int[]{};
+            }
+
+            int n = edges.length;
+
+            List<List<Integer>> graph = new ArrayList<>();
+            for(int i = 0; i <= n; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+                boolean[] visited = new boolean[n+1];
+                if(hasPath(u, v, graph, visited)) {
+                    return new int[]{u, v};
+                }
+
+                graph.get(u).add(v);
+                graph.get(v).add(u);
+            }
+
+            return new int[]{};
+        }
+    }
+
     class Revision01 {
 
         // ==============================

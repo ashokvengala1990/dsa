@@ -26,6 +26,185 @@ https://leetcode.com/problems/course-schedule-ii/description/
  */
 
 public class Course_Schedule_II_LC_210 {
+    class Revision03 {
+        private boolean dfs(int node, List<List<Integer>> graph, int[] state, LinkedList<Integer> result) {
+            state[node] = 1;
+
+            for(int neighbor: graph.get(node)) {
+                if(state[neighbor] == 0) {
+                    if(!dfs(neighbor, graph, state, result)) {
+                        return false;
+                    }
+                } else if(state[neighbor] == 1) {
+                    return false;
+                }
+            }
+
+            state[node] = 2;
+            result.addFirst(node);
+
+            return true;
+        }
+
+        public int[] findOrder1(int numCourses, int[][] prerequisites) {
+            List<List<Integer>> graph = new ArrayList<>();
+            LinkedList<Integer> result = new LinkedList<>();
+            int[] state = new int[numCourses]; // 0 -> not visited, 1 -> visiting, 2 -> visited
+
+            for(int i = 0; i < numCourses; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], preReq = prerequisite[1];
+                graph.get(preReq).add(course);
+            }
+
+            for(int node = 0; node < numCourses; node++) {
+                if(state[node] == 0) {
+                    if(!dfs(node, graph, state, result)) {
+                        return new int[]{};
+                    }
+                }
+            }
+
+
+            return result.size() == numCourses ? result.stream().mapToInt(Integer::intValue).toArray() : new int[]{};
+        }
+
+        public int[] findOrder0(int numCourses, int[][] prerequisites) {
+            List<List<Integer>> graph = new ArrayList<>();
+            int[] inDegree = new int[numCourses];
+            List<Integer> result = new ArrayList<>();
+            Queue<Integer> queue = new LinkedList<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], preReq = prerequisite[1];
+                graph.get(preReq).add(course);
+                inDegree[course]++;
+            }
+
+            for(int i = 0; i < numCourses; i++) {
+                if(inDegree[i] == 0) {
+                    queue.offer(i);
+                }
+            }
+
+            while (!queue.isEmpty()) {
+                int node = queue.poll();
+                result.add(node);
+
+                for(int neighbor: graph.get(node)) {
+                    inDegree[neighbor]--;
+                    if(inDegree[neighbor] == 0) {
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+
+            return result.size() == numCourses ? result.stream().mapToInt(Integer::intValue).toArray() : new int[]{};
+        }
+    }
+
+    class Revision02 {
+        public int[] findOrderUsingTopoSortAlgorithm(int numCourses, int[][] prerequisites) {
+            Map<Integer, List<Integer>> adjMap = new HashMap<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                adjMap.put(i, new ArrayList<>());
+            }
+
+            int[] inDegree = new int[numCourses];
+
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], prereq = prerequisite[1];
+                adjMap.get(prereq).add(course);
+                inDegree[course]++;
+            }
+
+            Queue<Integer> queue = new LinkedList<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                if(inDegree[i] == 0) {
+                    queue.offer(i);
+                }
+            }
+
+            List<Integer> topoSort = new ArrayList<>();
+
+            while (!queue.isEmpty()) {
+                int currNode = queue.poll();
+                topoSort.add(currNode);
+
+                for(int neighbor: adjMap.get(currNode)) {
+                    inDegree[neighbor]--;
+                    if(inDegree[neighbor] == 0) {
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+
+            return topoSort.size() == numCourses
+                    ? topoSort.stream().mapToInt(Integer::valueOf).toArray()
+                    : new int[]{};
+        }
+
+        private boolean helperDFS(int node, Map<Integer, List<Integer>> adjMap, boolean[] visited, boolean[] pathVisited, Stack<Integer> inStack) {
+            visited[node] = true;
+            pathVisited[node] = true;
+
+            for(int neighbor: adjMap.get(node)) {
+                if(!visited[neighbor]) {
+                    if(!helperDFS(neighbor, adjMap, visited, pathVisited, inStack)) {
+                        return false;
+                    }
+                } else if(pathVisited[neighbor]) {
+                    return false;
+                }
+            }
+
+            pathVisited[node] = false;
+            inStack.push(node);
+            return true;
+        }
+
+        public int[] findOrderUsingDFS(int numCourses, int[][] prerequisites) {
+            Map<Integer, List<Integer>> adjMap = new HashMap<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                adjMap.put(i, new ArrayList<>());
+            }
+
+
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], prereq = prerequisite[1];
+                adjMap.get(prereq).add(course);
+            }
+
+            boolean[] visited = new boolean[numCourses], pathVisited = new boolean[numCourses];
+            Stack<Integer> inStack = new Stack<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                if(!visited[i] && !helperDFS(i, adjMap, visited, pathVisited, inStack)) {
+                    return new int[]{};
+                }
+            }
+
+            int[] topoSort = new int[numCourses];
+            int i = 0;
+
+            while(i < numCourses && !inStack.isEmpty()) {
+                topoSort[i++] = inStack.pop();
+            }
+
+            return topoSort;
+        }
+    }
+
     class Revision01 {
 
         /**

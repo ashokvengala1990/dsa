@@ -21,6 +21,155 @@ Summary Table
 */
 
 public class Number_of_Connected_Components_in_an_Undirected_Graph_LC_323 {
+    class Revision02 {
+        class UnionFind {
+            private int[] parent, size;
+            private int numComponents;
+            UnionFind(int n) {
+                parent = new int[n];
+                size = new int[n];
+                for(int i = 0; i < n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+                numComponents = n;
+            }
+
+            public int findUltimateParent(int node) {
+                if(parent[node] == node) {
+                    return node;
+                }
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public void unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) {
+                    return;
+                }
+
+                if(size[ulpu] < size[ulpv]) {
+                    parent[ulpu] = ulpv;
+                    size[ulpv] += size[ulpu];
+                } else {
+                    parent[ulpv] = ulpu;
+                    size[ulpu] += size[ulpv];
+                }
+                numComponents--;
+            }
+
+            public int getNumComponents() {
+                return numComponents;
+            }
+        }
+        public int countComponents2(int n, int[][] edges) {
+            UnionFind uf = new UnionFind(n);
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+                uf.unionBySize(u, v);
+            }
+
+            return uf.getNumComponents();
+        }
+
+        private void dfs(int node, List<List<Integer>> graph, boolean[] visited) {
+            visited[node] = true;
+
+            for(int neighbor: graph.get(node)) {
+                if(!visited[neighbor]) {
+                    dfs(neighbor, graph, visited);;
+                }
+            }
+        }
+
+        private void bfsUsingQueue(int node, List<List<Integer>> graph, boolean[] visited) {
+            Queue<Integer> queue = new LinkedList<>();
+            queue.offer(node);
+            visited[node] = true;
+
+            while (!queue.isEmpty()) {
+                int currNode = queue.poll();
+
+                for(int neighbor: graph.get(currNode)) {
+                    if(!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+        }
+
+        private void dfsUsingStack(int node, List<List<Integer>> graph, boolean[] visited) {
+            Stack<Integer> stack = new Stack<>();
+            stack.push(node);
+            visited[node] = true;
+
+            while (!stack.isEmpty()) {
+                int currNode = stack.pop();
+
+                for(int neighbor: graph.get(currNode)) {
+                    if(!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        stack.push(neighbor);
+                    }
+                }
+            }
+        }
+
+        public int countComponents1(int n, int[][] edges) {
+            boolean[] visited = new boolean[n];
+            List<List<Integer>> graph = new ArrayList<>();
+            int count = 0;
+
+            for(int i = 0; i < n; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+                graph.get(u).add(v);
+                graph.get(v).add(u);
+            }
+
+            for(int i = 0; i < n; i++) {
+                if(!visited[i]) {
+                    count++;
+//                    dfsUsingStack(i, graph, visited);
+                    bfsUsingQueue(i, graph, visited);
+                }
+            }
+
+            return count;
+        }
+
+        public int countComponents(int n, int[][] edges) {
+            boolean[] visited = new boolean[n];
+            List<List<Integer>> graph = new ArrayList<>();
+            int count = 0;
+
+            for(int i = 0; i < n; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+                graph.get(u).add(v);
+                graph.get(v).add(u);
+            }
+
+            for(int i = 0; i < n; i++) {
+                if(!visited[i]) {
+                    dfs(i, graph, visited);
+                    count++;
+                }
+            }
+
+            return count;
+        }
+    }
+
     class Revision01 {
 
         // ----------------------------------------------------------

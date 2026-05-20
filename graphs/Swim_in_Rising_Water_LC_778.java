@@ -68,6 +68,187 @@ or it can asked like Finding the minimum ‘maximum elevation’ along any path 
 */
 
 public class Swim_in_Rising_Water_LC_778 {
+    class Revision01 {
+        class UnionFind {
+            private int[] parent, size;
+
+            UnionFind(int n) {
+                parent = new int[n];
+                size = new int[n];
+
+                for(int i = 0; i < n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+            }
+
+            public int findUltimateParent(int node) {
+                if(parent[node] == node) {
+                    return node;
+                }
+
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public boolean unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) {
+                    return false;
+                }
+
+                if(size[ulpu] < size[ulpv]) {
+                    parent[ulpu] = ulpv;
+                    size[ulpv] += size[ulpu];
+                } else {
+                    parent[ulpv] = ulpu;
+                    size[ulpu] += size[ulpv];
+                }
+
+                return true;
+            }
+        }
+
+        private static final int[][] offsetNeighbors = {{-1, 0},{0, 1},{1, 0},{0, -1}};
+
+        private boolean isValid(int row, int col, int rows, int cols) {
+            return row >= 0 && row < rows && col >= 0 && col < cols;
+        }
+
+        public int swimInWaterUsingUnionFindAlgorithm(int[][] grid) {
+            if(grid == null || grid.length == 0) {
+                return 0;
+            }
+
+            List<int[]> edges = new ArrayList<>();
+            int rows = grid.length, cols = grid[0].length, src = 0, dst = (rows - 1) * cols + (cols-1);
+            UnionFind uf = new UnionFind(rows*cols);
+
+            for(int r = 0; r < rows; r++) {
+                for(int c = 0; c < cols; c++) {
+                    if(c + 1 < cols) {  // right neighbor
+                        edges.add(new int[]{Math.max(grid[r][c], grid[r][c+1]), r, c, r, c+1});
+                    }
+                    if(r + 1 < rows) {
+                        edges.add(new int[]{Math.max(grid[r][c], grid[r+1][c]), r, c, r+1, c});
+                    }
+                }
+            }
+
+            edges.sort((a, b) -> Integer.compare(a[0], b[0]));
+
+            // Union-Find Step
+            for(int[] edge: edges) {
+                int time = edge[0], idx1 = edge[1] * cols + edge[2], idx2 = edge[3] * cols + edge[4];
+                if(uf.unionBySize(idx1, idx2)) {
+                    if (uf.findUltimateParent(src) == uf.findUltimateParent(dst)) {
+                        return time;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        private List<int[]> buildPath(int[][][] prev, int rows, int cols) {
+            List<int[]> path = new ArrayList<>();
+            int r = rows-1, c = cols-1;
+
+            while (r != -1 && c != -1) {
+                path.add(new int[]{r, c});
+                int[] parent = prev[r][c];
+                r = parent[0];
+                c = parent[1];
+            }
+
+            Collections.reverse(path);
+            return path;
+        }
+
+        private void printPath(int[][][] prev, int rows, int cols) {
+            List<int[]> path = buildPath(prev, rows, cols);
+            for(int[] cell: path) {
+                System.out.print("["+cell[0]+","+cell[1]+"] -> ");
+            }
+            System.out.println("END");
+        }
+
+        public int swimInWaterWithPath(int[][] grid) {
+            if(grid == null || grid.length == 0) {
+                return 0;
+            }
+
+            int rows = grid.length, cols = grid[0].length;
+            boolean[][] visited = new boolean[rows][cols];
+            int[][][] prev = new int[rows][cols][]; // prev[r][c] = {parentRow, parentCol}
+            // {time, row, col, parentRow, parentCol}
+            PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> Integer.compare(a[0], b[0]));
+            minHeap.offer(new int[]{grid[0][0], 0, 0, -1, -1});
+
+            while (!minHeap.isEmpty()) {
+                int[] curr = minHeap.poll();
+                int time = curr[0], r = curr[1], c = curr[2], pr = curr[3], pc = curr[4];
+
+                if(visited[r][c])
+                    continue;
+
+                visited[r][c] = true;
+                prev[r][c] = new int[]{pr, pc};
+
+                if(r == (rows-1) && c == (cols-1)) {
+                    printPath(prev, rows, cols);
+                    return time;
+                }
+
+                for(int[] neighbor: offsetNeighbors) {
+                    int nr = r + neighbor[0], nc = c + neighbor[1];
+
+                    if(isValid(nr, nc, rows, cols) && !visited[nr][nc]) {
+                        int newTime = Math.max(time, grid[nr][nc]);
+                        minHeap.offer(new int[]{newTime, nr, nc, r, c});
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        public int swimInWater(int[][] grid) {
+            if(grid == null || grid.length == 0) {
+                return 0;
+            }
+
+            int rows = grid.length, cols = grid[0].length;
+            // {time, row, col}
+            PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> Integer.compare(a[0], b[0]));
+            minHeap.offer(new int[]{grid[0][0], 0, 0});
+            boolean[][] visited = new boolean[rows][cols];
+
+            while (!minHeap.isEmpty()) {
+                int[] curr = minHeap.poll();
+                int time = curr[0], r = curr[1], c = curr[2];
+
+                if(visited[r][c])
+                    continue;
+
+                visited[r][c] = true;
+                if(r == (rows-1) && c == (cols-1))
+                    return time;
+
+                for(int[] neighbor: offsetNeighbors) {
+                    int nr = r + neighbor[0], nc = c + neighbor[1];
+
+                    if(isValid(nr, nc, rows, cols) && !visited[nr][nc]) {
+                        int newTime = Math.max(time, grid[nr][nc]);
+                        minHeap.offer(new int[]{newTime, nr, nc});
+                    }
+                }
+            }
+
+            return 0;
+        }
+    }
+
     public class Solution {
         private List<int[]> reconstructPath(int[][] parent, int n) {
             int r = n-1, c = n-1;

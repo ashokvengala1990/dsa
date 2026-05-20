@@ -3,7 +3,7 @@ package neetcode.graphs;
 import java.util.*;
 
 public class Adjacency_List_Neetcode {
-    class Basic {
+    static class Basic {
         class GraphNode {
             int val;
             List<GraphNode> neighbors;
@@ -14,7 +14,7 @@ public class Adjacency_List_Neetcode {
             }
         }
 
-        public void setup() {
+        public Map<String, List<String>> setup() {
             Map<String, List<String>> adjList = new HashMap<>();
             // Given directed edges, build an adjacency list
             String[][] edges = {{"A","B"},{"B","C"},{"B","E"},{"C","E"},{"E","D"}};
@@ -35,6 +35,8 @@ public class Adjacency_List_Neetcode {
                 // Retrieve the key (souce) and add the destination to it's list of neighbors.
                 adjList.get(src).add(dst);
             }
+
+            return adjList;
         }
 
         public int bfs(String node, String target, Map<String, List<String>> adjList) {
@@ -64,7 +66,7 @@ public class Adjacency_List_Neetcode {
                 length++;
             }
 
-            return length;
+            return -1;
         }
 
         public int dfs(String node, String target, Map<String, List<String>> adjList, Set<String> visited) {
@@ -84,5 +86,12 @@ public class Adjacency_List_Neetcode {
             visited.remove(node);
             return count;
         }
+    }
+
+    public static void main(String[] args) {
+        Basic basic = new Basic();
+        Map<String, List<String>> adjListMap = basic.setup();
+
+        System.out.println(basic.dfs("A","E", adjListMap, new HashSet<>()));
     }
 }

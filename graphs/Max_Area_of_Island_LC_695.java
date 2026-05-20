@@ -17,6 +17,126 @@ import java.util.Stack;
  */
 
 public class Max_Area_of_Island_LC_695 {
+    class Revision02 {
+        class UnionFind {
+            private int[] parent, size;
+            private int maxComponentSize;
+
+            UnionFind(int n) {
+                parent = new int[n];
+                size = new int[n];
+                maxComponentSize = 0;
+
+                for(int i = 0; i < n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+            }
+
+            public int findUltimateParent(int node) {
+                if(parent[node] == node) {
+                    return node;
+                }
+
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public boolean unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) {
+                    return false;
+                }
+
+                if(size[ulpu] < size[ulpv]) {
+                    parent[ulpu] = ulpv;
+                    size[ulpv] += size[ulpu];
+                    maxComponentSize = Math.max(maxComponentSize, size[ulpv]);
+                } else {
+                    parent[ulpv] = ulpu;
+                    size[ulpu] += size[ulpv];
+                    maxComponentSize = Math.max(maxComponentSize, size[ulpu]);
+                }
+
+                return true;
+            }
+
+            public int getMaxNoOfComponent() {
+                return maxComponentSize;
+            }
+        }
+
+        private final static int[][] offsetNeighbors = {{-1, 0},{0, 1},{1, 0},{0, -1}};
+
+        private boolean isValid(int row, int col, int rows, int cols) {
+            return row >= 0 && row < rows && col >= 0 && col < cols;
+        }
+
+        private int dfs(int r, int c, int[][] grid, boolean[][] visited, int rows, int cols) {
+            visited[r][c] = true;
+            int count = 1;
+
+            for(int[] neighbor: offsetNeighbors) {
+                int nr = r + neighbor[0], nc = c + neighbor[1];
+
+                if(isValid(nr, nc, rows, cols) && grid[nr][nc] == 1 && !visited[nr][nc]) {
+                    count += dfs(nr, nc, grid, visited, rows, cols);
+                }
+            }
+
+            return count;
+        }
+
+        public int maxAreaOfIsland1(int[][] grid) {
+            if(grid == null || grid.length == 0) {
+                return 0;
+            }
+
+            int rows = grid.length, cols = grid[0].length, maxArea = 0;
+            UnionFind uf = new UnionFind(rows * cols);
+            boolean hasLand = false;
+
+            for(int r = 0; r < rows; r++) {
+                for(int c = 0; c < cols; c++) {
+                    if(grid[r][c] == 1) {
+                        int idx1 = r * cols + c;
+                        hasLand = true;
+
+                        for(int[] neighbor: offsetNeighbors) {
+                            int nr = r + neighbor[0], nc = c + neighbor[1];
+
+                            if(isValid(nr, nc, rows, cols) && grid[nr][nc] == 1) {
+                                int idx2 = nr * cols + nc;
+                                uf.unionBySize(idx1, idx2);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return hasLand ? Math.max(1, uf.getMaxNoOfComponent()) : 0;
+        }
+
+        public int maxAreaOfIsland(int[][] grid) {
+            if(grid == null || grid.length == 0) {
+                return 0;
+            }
+
+            int maxArea = 0, rows = grid.length, cols = grid[0].length;
+            boolean[][] visited = new boolean[rows][cols];
+
+            for(int r = 0; r < rows; r++) {
+                for(int c = 0; c < cols; c++) {
+                    if(grid[r][c] == 1 && !visited[r][c]) {
+                        maxArea = Math.max(maxArea, dfs(r, c, grid, visited, rows, cols));
+                    }
+                }
+            }
+
+            return maxArea;
+        }
+    }
+
     class Revision01 {
         class UnionFind {
             private final int[] parent;

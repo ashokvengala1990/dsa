@@ -59,6 +59,95 @@ public class Prims {
         }
     }
 
+    class Revision02 {
+        public int primMSTEdges(int n, int[][] edges) {
+            List<List<int[]>> graph = new ArrayList<>();
+
+            for(int i = 0; i < n; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1], wt = edge[2];
+                graph.get(u).add(new int[]{v, wt});
+                graph.get(v).add(new int[]{u, wt});
+            }
+
+            int totalCost = 0;
+            List<int[]> mstEdges = new ArrayList<>();
+
+            PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> a[0] - b[0]);
+            minHeap.offer(new int[]{0, -1, 0}); // {weight, parentNode, node}
+            boolean[] inMST = new boolean[n];
+
+            while (!minHeap.isEmpty() && mstEdges.size() < n-1) {
+                int[] curr = minHeap.poll();
+                int cost = curr[0], parentNode = curr[1], node = curr[2];
+
+                if(inMST[node]) continue;
+
+                inMST[node] = true;
+                totalCost += cost;
+                if(parentNode != -1) {
+                    mstEdges.add(new int[]{parentNode, node});
+                }
+
+                for(int[] edge: graph.get(node)) {
+                    if(!inMST[edge[0]]) {
+                        minHeap.offer(new int[]{edge[1], node, edge[0]});
+                    }
+                }
+            }
+/*
+            System.out.println("====== MST Edges ======");
+            for(int[] edge: mstEdges) {
+                System.out.println(edge[0]+"<->"+edge[1]);
+            }
+            System.out.println();
+ */
+
+            return mstEdges.size() == n-1 ? totalCost : -1;
+        }
+
+        public int primMST(int n, int[][] edges) {
+            List<List<int[]>> graph = new ArrayList<>();
+
+            for(int i = 0; i < n; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1], wt = edge[2];
+                graph.get(u).add(new int[]{v, wt});
+                graph.get(v).add(new int[]{u, wt});
+            }
+
+            PriorityQueue<int[]> minHeap = new PriorityQueue<>((a, b) -> a[0] - b[0]); // {weight, node}
+            minHeap.offer(new int[]{0, 0});
+            int totalCost = 0, nodesInMST = 0;
+            boolean[] inMST = new boolean[n];
+
+            while (!minHeap.isEmpty()) { // && edgesUsed < n : This condition is optional
+                int[] curr = minHeap.poll();
+                int cost = curr[0], node = curr[1];
+
+                if(inMST[node]) continue;
+
+                inMST[node] = true;
+                totalCost += cost;
+                nodesInMST++;
+
+                for(int[] edge: graph.get(node)) {
+                    if(!inMST[edge[0]]) {
+                        minHeap.offer(new int[]{edge[1], edge[0]});
+                    }
+                }
+            }
+
+            return nodesInMST == n ? totalCost : -1;
+        }
+    }
+
     static class Revision01 {
         public static List<int[]> mst(int[][] edges, int n) {
             // Create adjacency list to store the graph (node -> list of [neighbor, weight])

@@ -20,6 +20,148 @@ Summary of Each Approach
  */
 
 public class Graph_Valid_Tree_LC_261 {
+    class Revision02 {
+        class UnionFind {
+            private int[] parent, size;
+            private int numComponents;
+            UnionFind(int n) {
+                parent = new int[n];
+                size = new int[n];
+                for(int i = 0; i < n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+                numComponents = n;
+            }
+
+            public int findUltimateParent(int node) {
+                if(parent[node] == node) {
+                    return node;
+                }
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public boolean unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) {
+                    return false;
+                }
+
+                if(size[ulpu] < size[ulpv]) {
+                    parent[ulpu] = ulpv;
+                    size[ulpv] += size[ulpu];
+                } else {
+                    parent[ulpv] = ulpu;
+                    size[ulpu] += size[ulpv];
+                }
+                numComponents--;
+                return true;
+            }
+
+            public int getNumComponents() {
+                return numComponents;
+            }
+        }
+
+        public boolean validTree2(int n, int[][] edges) {
+            UnionFind uf = new UnionFind(n);
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+
+                if(!uf.unionBySize(u, v)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private boolean bfsUsingQueue(int node, int parent, List<List<Integer>> graph, boolean[] visited) {
+            Queue<int[]> queue = new LinkedList<>();
+            queue.offer(new int[]{node, parent});
+            visited[node] = true;
+
+            while (!queue.isEmpty()) {
+                int[] curr = queue.poll();
+                int currNode = curr[0], parentNode = curr[1];
+
+                for(int neighbor: graph.get(currNode)) {
+                    if(!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        queue.offer(new int[]{neighbor, currNode});
+                    } else if(neighbor != parentNode) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private boolean dfsUsingStack(int node, int parent, List<List<Integer>> graph, boolean[] visited) {
+            Stack<int[]> stack = new Stack<>();
+            stack.push(new int[]{node, parent});
+            visited[node] = true;
+
+            while (!stack.isEmpty()) {
+                int[] curr = stack.pop();
+                int currNode = curr[0], parentNode = curr[1];
+
+                for(int neighbor: graph.get(currNode)) {
+                    if(!visited[neighbor]) {
+                        visited[neighbor] = true;
+                        stack.push(new int[]{neighbor, currNode});
+                    } else if(neighbor != parentNode) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private boolean dfs(int node, int parent, List<List<Integer>> graph, boolean[] visited) {
+            visited[node] = true;
+
+            for(int neighbor: graph.get(node)) {
+               if(!visited[neighbor]) {
+                   if(!dfs(neighbor, node, graph, visited)) {
+                       return false;
+                   }
+               } else if(neighbor != parent) {
+                   return false;
+               }
+            }
+
+            return true;
+        }
+
+        public boolean validTree0(int n, int[][] edges) {
+            List<List<Integer>> graph = new ArrayList<>();
+            boolean[] visited = new boolean[n];
+
+            for(int i = 0; i < n; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] edge: edges) {
+                int u = edge[0], v = edge[1];
+                graph.get(u).add(v);
+                graph.get(v).add(u);
+            }
+
+            dfs(0, -1, graph, visited);
+
+            for(boolean v: visited) {
+                if(!v) return false;
+            }
+
+            return true;
+        }
+    }
+
     class Revision01 {
 
         // ---------------------------

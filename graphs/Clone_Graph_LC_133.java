@@ -6,10 +6,79 @@ import java.util.*;
 - https://leetcode.com/problems/clone-graph/description/
 
 - Using DFS or Stack Data Structure and Hashmap Data structure
-    * TC: O(
+    * TC: O(V + E)
+    * SC: O(V)
  */
 
 public class Clone_Graph_LC_133 {
+    class Revision01 {
+        class Node {
+            public int val;
+            public List<Node> neighbors;
+
+            Node() {}
+            Node(int _val) {
+                this.val = _val;
+                this.neighbors = new ArrayList<>();
+            }
+
+            Node(int _val, List<Node> _neighbors) {
+                this.val = _val;
+                this.neighbors = _neighbors;
+            }
+        }
+
+        public Node cloneGraph1(Node node) {
+            if(node == null) {
+                return node;
+            }
+
+            Map<Node, Node> oldToNewMap = new HashMap<>();
+            Stack<Node> stack = new Stack<>();
+            Node rootNewNode = new Node(node.val);
+            stack.push(node);
+            oldToNewMap.put(node, rootNewNode);
+
+            while (!stack.isEmpty()) {
+                Node currNode = stack.pop();
+
+                for(Node neighbor: currNode.neighbors) {
+                    if(!oldToNewMap.containsKey(neighbor)) {
+                        oldToNewMap.put(neighbor, new Node(neighbor.val));
+                        stack.push(neighbor);
+                    }
+
+                    oldToNewMap.get(currNode).neighbors.add(oldToNewMap.get(neighbor));
+                }
+            }
+
+            return rootNewNode;
+        }
+
+        public Node dfs(Node node, Map<Node, Node> oldToNewMap) {
+            if(node == null) {
+                return node;
+            } else if(oldToNewMap.containsKey(node)) {
+                return oldToNewMap.get(node);
+            }
+
+            Node newNode = new Node(node.val);
+            oldToNewMap.put(node, newNode);
+
+            for(Node neighbor: node.neighbors) {
+                newNode.neighbors.add(dfs(neighbor, oldToNewMap));
+            }
+
+            return newNode;
+        }
+
+        public Node cloneGraph(Node node) {
+            Map<Node, Node> oldToNewMap = new HashMap<>();
+
+            return dfs(node, oldToNewMap);
+        }
+    }
+
     class Node {
         int val;
         List<Node> neighbors;

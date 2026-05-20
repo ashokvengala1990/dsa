@@ -110,6 +110,124 @@ O(m × n) ✅
  */
 
 public class Pacific_Atlantic_Water_Flow_LC_417 {
+    class Revision01 {
+        private static final int[][] offsetNeighbors = {{-1, 0},{0, 1},{1, 0},{0, -1}};
+
+        private boolean isValid(int row, int col, int rows, int cols) {
+            return row >= 0 && row < rows && col >= 0 && col < cols;
+        }
+
+        private void bfs(Queue<int[]> queue, boolean[][] canReachable, int[][] heights) {
+            int rows = heights.length, cols = heights[0].length;
+
+            while (!queue.isEmpty()) {
+                int[] curr = queue.poll();
+                int row = curr[0], col = curr[1];
+
+                for(int[] neighbor: offsetNeighbors) {
+                    int neiRow = row + neighbor[0], neiCol = col + neighbor[1];
+
+                    if(isValid(neiRow, neiCol, rows, cols) && !canReachable[neiRow][neiCol] && heights[row][col] <= heights[neiRow][neiCol]) {
+                        canReachable[neiRow][neiCol] = true;
+                        queue.offer(new int[]{neiRow, neiCol});
+                    }
+                }
+            }
+        }
+
+        public List<List<Integer>> pacificAtlantic1(int[][] heights) {
+            if(heights == null || heights.length == 0) {
+                return new ArrayList<>();
+            }
+
+            int rows = heights.length, cols = heights[0].length;
+            boolean[][] canReachPacific = new boolean[rows][cols], canReachAtlantic = new boolean[rows][cols];
+            Queue<int[]> pacificQueue = new LinkedList<>(), atlanticQueue = new LinkedList<>();
+            List<List<Integer>> result = new ArrayList<>();
+
+            for(int col = 0; col < cols; col++) {
+                if(!canReachPacific[0][col]) {
+                    canReachPacific[0][col] = true;
+                    pacificQueue.offer(new int[]{0, col});
+                }
+
+                if(!canReachAtlantic[rows-1][col]) {
+                    canReachAtlantic[rows-1][col] = true;
+                    atlanticQueue.offer(new int[]{rows - 1, col});
+                }
+            }
+
+            for(int row = 0; row < rows; row++) {
+                if(!canReachPacific[row][0]) {
+                    canReachPacific[row][0] = true;
+                    pacificQueue.offer(new int[]{row, 0});
+                }
+
+                if(!canReachAtlantic[row][cols-1]) {
+                    canReachAtlantic[row][cols-1] = true;
+                    atlanticQueue.offer(new int[]{row, cols - 1});
+                }
+            }
+
+            bfs(pacificQueue, canReachPacific, heights);
+            bfs(atlanticQueue, canReachAtlantic, heights);
+
+            for(int row = 0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(canReachPacific[row][col] && canReachAtlantic[row][col]) {
+                        result.add(List.of(row, col));
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void dfs(int row, int col, int[][] heights, boolean[][] canReachable, int rows, int cols) {
+            canReachable[row][col] = true;
+
+            for(int[] neighbor: offsetNeighbors) {
+                int neiRow = row + neighbor[0], neiCol = col + neighbor[1];
+
+                if(isValid(neiRow, neiCol, rows, cols) && !canReachable[neiRow][neiCol] && heights[row][col] <= heights[neiRow][neiCol]) {
+                    dfs(neiRow, neiCol, heights, canReachable, rows, cols);
+                }
+            }
+        }
+
+        public List<List<Integer>> pacificAtlantic(int[][] heights) {
+            if(heights == null || heights.length == 0) {
+                return new ArrayList<>();
+            }
+
+            int rows = heights.length, cols = heights[0].length;
+            boolean[][] canReachPacific = new boolean[rows][cols], canReachAtlantic = new boolean[rows][cols];
+            List<List<Integer>> result = new ArrayList<>();
+
+            // Up, Bottom
+            for(int col = 0; col < cols; col++) {
+                dfs(0, col, heights, canReachPacific, rows, cols);
+                dfs(rows-1, col, heights, canReachAtlantic, rows, cols);
+            }
+
+            // Left, Right
+            for(int row = 0; row < rows; row++) {
+                dfs(row, 0, heights, canReachPacific, rows, cols);
+                dfs(row, cols-1, heights, canReachAtlantic, rows, cols);
+            }
+
+            for(int row =0; row < rows; row++) {
+                for(int col = 0; col < cols; col++) {
+                    if(canReachPacific[row][col] && canReachAtlantic[row][col]) {
+                        result.add(List.of(row, col));
+                    }
+                }
+            }
+
+            return result;
+        }
+    }
+
     class Solution {
         private void dfs1(int row, int col, int[][] heights, boolean[][] canReachable, int rows, int cols) {
             canReachable[row][col] = true;

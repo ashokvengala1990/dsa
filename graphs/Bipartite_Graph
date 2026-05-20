@@ -1,0 +1,14 @@
+- A graph that can be colored with 2 colors. Such that, no 2 adjacent nods have the same color.
+- 2 colors can be anything like 0 or 1 || red or yellow || something 2 colors
+- If a graph has even length cycle or Linear graph, then it is considered as Bipartite graph
+- If a graph has odd length cycle, then it is not considered a bipartite graph.
+- An input graph can be disconnected graph and it mean's that the graph may not be connected, meaning there may be two nodes
+  u and v such that there is no path between them.
+- A graph is bipartite if the nodes can be partitioned into two independent sets A and B such that every edge in the graph
+  connects a node in set A and a node in set B. Return true if and only if it is bipartite graph. Otherwise, false.
+- You can solve this using DFS or BFS Algorithm
+- You can build adjMap/List/ClassNode
+- For BFS Algorithm:
+    - Need queue data structure
+    - color array: we can allow -1, 0, and 1 values. It is similar to visited array. The reason why int[] array is required is
+    we have 3 different values and that's why we need int[] array

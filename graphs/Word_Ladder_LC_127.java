@@ -83,6 +83,7 @@ Recommended	No	Yes ✔
  */
 
 public class Word_Ladder_LC_127 {
+
     class Revision01 {
         private boolean isSingleDiffLetter(String word1, String word2) {
             if(word1.length() != word2.length()) {

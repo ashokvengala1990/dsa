@@ -39,7 +39,6 @@ Key points:
 * Can return both shortest distances and paths.
 * Complexity: O(E log V) with a min-heap.
 
-
 Revision01:
 Summary Table (Worst-Case)
 Algorithm	            Worst-Case TC	Space Complexity                SC	Notes
@@ -50,9 +49,209 @@ Dijkstra (min-heap)	    O(E log N)	    O(N + E)	                Heap ensures bet
 ✅ Key takeaway:
 - DFS/BFS: Usually O(N + E), but in worst-case for weighted graphs with multiple paths and no pruning, it can be O(N * E).
 - Dijkstra: More predictable, O(E log N) because heap prioritizes minimum distance and avoids unnecessary revisits.
+
+
+
+======> Claude content:
+LC 743 – Network Delay Time (revision notes)
+Idea: Directed weighted graph. Signal sent from node k to all nodes — return time for last node to receive it, or -1 if any node unreachable.
+Approach: Dijkstra's from source k. Answer = max(distance[i]) across all nodes.
+Key steps:
+
+Build adjacency list: List<List<int[]>> where each entry is {neighbor, weight}.
+Run Dijkstra from k: min-heap of {cost, node}, relax edges.
+After: if any distance is INF → unreachable, return -1. Else return max distance.
+
+Why max distance?
+Signal travels in parallel. Time until all nodes receive = time the slowest path completes = max shortest-path distance.
+Why Dijkstra (not BFS)?
+Edges have non-negative weights. BFS only works for unweighted (or uniform-weight) graphs. Bellman-Ford works but is O(V·E) — overkill since no negative weights.
+Min-heap structure: {cost, node}
+Cost first so PQ comparator sorts by distance. Java tip: (a,b) -> a[0]-b[0] works since costs are bounded; for safety with large values use Integer.compare(a[0], b[0]).
+The stale-entry skip — if(cost > distance[node]) continue;
+We push to heap on every relaxation → same node may appear multiple times with different costs. When popped, if its cost is worse than the recorded best, skip. This is the "lazy deletion" pattern — simpler than decrease-key.
+Gotchas:
+
+1-indexed nodes → size arrays as n+1 and skip index 0 when computing max.
+Don't break early on first INF — need to check all nodes.
+Initialize distance[src] = 0, everything else INF.
+Push {0, src} to start the heap.
+Don't mark nodes "visited" globally — the cost-vs-distance check handles it correctly. Marking visited on pop also works (and prevents re-processing), but the lazy check is cleaner.
+
+Why relaxation works:
+First time a node is popped, its cost equals the true shortest distance (greedy property — non-negative edges guarantee this). Later pops of the same node have stale (larger) costs and get skipped.
+Complexity: O((V + E) log V) time with binary heap, O(V + E) space.
+Pattern recognition:
+
+"Shortest path from one source, non-negative weights" → Dijkstra.
+"Time for signal/info to reach all nodes" → Dijkstra + max of distances.
+"Cheapest/fastest path single-source" → Dijkstra.
+
+Don't confuse with:
+
+Negative weights → Bellman-Ford.
+All-pairs shortest paths → Floyd-Warshall.
+Unweighted shortest path → BFS.
+≤ K stops constraint (LC 787) → modified BFS / Bellman-Ford.
+
+
+======= Test cases:
+ Case 1: Basic — all nodes reachable
+
+  times = [[2,1,1],[2,3,1],[3,4,1]], n=4, k=2
+
+          1
+        1/
+    2 →
+        1\     1
+          3 ——→ 4
+
+  dist: {1:1, 2:0, 3:1, 4:2}
+  max = 2  →  return 2
+
+  ---
+  Case 2: Unreachable node — return -1
+
+  times = [[1,2,1]], n=3, k=1
+
+    1 ——→ 2      3 (isolated, no edge points to it)
+
+  dist: {1:0, 2:1, 3:∞}
+  3 is unreachable  →  return -1
+
+  ---
+  Case 3: n=1, source only — return 0
+
+  times = [], n=1, k=1
+
+    Just node 1, already there.
+
+  dist: {1:0}
+  max = 0  →  return 0
+  This is why the guard times.length == 0 → return -1 was a bug.
+
+  ---
+  Case 4: Multiple paths — Dijkstra picks shortest
+
+  times = [[1,2,10],[1,3,1],[3,2,1]], n=3, k=1
+
+         10
+    1 ————————→ 2
+    |           ↑
+    1↓          1
+    3 ——————————
+
+  Path to 2:
+    Direct:   1→2 = 10
+    Via 3:    1→3→2 = 1+1 = 2  ✓ (shorter)
+
+  dist: {1:0, 2:2, 3:1}
+  max = 2  →  return 2
+
+  ---
+  Case 5: Source is not node 1
+
+  times = [[3,1,5],[3,2,2],[1,2,1]], n=3, k=3
+
+          5
+    3 ————————→ 1
+    |           |
+    2↓          1↓
+    2 ←————————
+        (cost 6 via 1, but 2 direct is better)
+
+  dist: {1:5, 2:2, 3:0}
+  max = 5  →  return 5
+
+  ---
+  Case 6: Linear chain — cost accumulates
+
+  times = [[1,2,1],[2,3,1],[3,4,1]], n=4, k=1
+
+    1 ——1——→ 2 ——1——→ 3 ——1——→ 4
+
+  dist: {1:0, 2:1, 3:2, 4:3}
+  max = 3  →  return 3
+
+  ---
+  Summary table
+
+  ┌──────┬──────────────────────────────────┬──────────────────┐
+  │ Case │             Scenario             │      Return      │
+  ├──────┼──────────────────────────────────┼──────────────────┤
+  │ 1    │ All reachable, multiple branches │ max dist         │
+  ├──────┼──────────────────────────────────┼──────────────────┤
+  │ 2    │ Some node isolated               │ -1               │
+  ├──────┼──────────────────────────────────┼──────────────────┤
+  │ 3    │ n=1, no edges needed             │ 0                │
+  ├──────┼──────────────────────────────────┼──────────────────┤
+  │ 4    │ Multiple paths to same node      │ shortest wins    │
+  ├──────┼──────────────────────────────────┼──────────────────┤
+  │ 5    │ Source ≠ node 1                  │ max dist from k  │
+  ├──────┼──────────────────────────────────┼──────────────────┤
+  │ 6    │ Linear chain                     │ accumulated cost │
+  └──────┴──────────────────────────────────┴──────────────────┘
+
  */
 
 public class Network_Delay_Time_LC_743 {
+    class Revision02 {
+        private int[] dijkstra(int src, int n, List<List<int[]>> adjGraph) {
+            int[] distance = new int[n];
+            Arrays.fill(distance, Integer.MAX_VALUE);
+            distance[src] = 0;
+
+            // min-heap: {cost, node}
+            PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> a[0]-b[0]);
+            minHeap.offer(new int[]{0, src});
+
+            while (!minHeap.isEmpty()) {
+                int[] curr = minHeap.poll();
+                int cost = curr[0], node = curr[1];
+
+                if(cost > distance[node]) continue;
+
+                for(int[] edge: adjGraph.get(node)) {
+                    int neighbor = edge[0], weight = edge[1];
+                    int newCost = cost + weight;
+                    if(newCost < distance[neighbor]) {
+                        distance[neighbor] = newCost;
+                        minHeap.offer(new int[]{distance[neighbor], neighbor});
+                    }
+                }
+            }
+
+            return distance;
+        }
+
+        public int networkDelayTime(int[][] times, int n, int k) {
+            if(k <= 0 || n <= 0 || times == null) {
+                return -1;
+            }
+
+            List<List<int[]>> adjGraph = new ArrayList<>();
+
+            for(int i = 0; i <= n; i++) {
+                adjGraph.add(new ArrayList<>());
+            }
+
+            for(int[] time: times) {
+                int u = time[0], v = time[1], wt = time[2];
+                adjGraph.get(u).add(new int[]{v, wt});
+            }
+
+            int[] distance = dijkstra(k, n+1, adjGraph);
+
+            int ans = 0;
+            for(int i = 1; i <= n; i++) {
+                if(distance[i] == Integer.MAX_VALUE) return -1;
+                ans = Math.max(ans, distance[i]);
+            }
+
+            return ans;
+        }
+    }
+
     public static void main(String[] args) {
         int[][] times = {{2,1,1},{2,3,1},{3,4,1}};
         int n = 4, k = 2;

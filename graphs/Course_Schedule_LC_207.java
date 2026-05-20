@@ -36,6 +36,167 @@ https://leetcode.com/problems/course-schedule/description/
  */
 
 public class Course_Schedule_LC_207 {
+    class Revision04 {
+        private boolean dfs(int node, List<List<Integer>> graph, int[] state) {
+            state[node] = 1;
+
+            for(int neighbor: graph.get(node)) {
+                if(state[neighbor] == 0) {
+                    if(!dfs(neighbor, graph, state)) {
+                        return false;
+                    }
+                } else if(state[neighbor] == 1) {
+                    return false;
+                }
+            }
+
+            state[node] = 2;
+            return true;
+        }
+
+        public boolean canFinish1(int numCourses, int[][] prerequisites) {
+            List<List<Integer>> graph = new ArrayList<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], preReq = prerequisite[1];
+                graph.get(preReq).add(course);
+            }
+
+            int[] state = new int[numCourses];
+
+            for(int i = 0; i < numCourses; i++) {
+                if(state[i] == 0) {
+                    if(!dfs(i, graph, state)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public boolean canFinish(int numCourses, int[][] prerequisites) {
+            List<List<Integer>> graph = new ArrayList<>();
+            int[] inDegree = new int[numCourses];
+            Queue<Integer> queue = new LinkedList<>();
+            int count = 0;
+
+            for(int i = 0; i < numCourses; i++) {
+                graph.add(new ArrayList<>());
+            }
+
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], preReq = prerequisite[1];
+                graph.get(preReq).add(course);
+                inDegree[course]++;
+            }
+
+            for(int i = 0; i < numCourses; i++) {
+                if(inDegree[i] == 0) {
+                    queue.offer(i);
+                }
+            }
+
+            while (!queue.isEmpty()) {
+                int course = queue.poll();
+                count++;
+
+                for(int neighbor: graph.get(course)) {
+                    inDegree[neighbor]--;
+                    if(inDegree[neighbor] == 0) {
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+
+            return count == numCourses;
+        }
+    }
+
+    class Revision03 {
+        public boolean canFinishUsingTopoSort(int numCourses, int[][] prerequisites) {
+            Map<Integer, List<Integer>> adjMap = new HashMap<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                adjMap.put(i, new ArrayList<>());
+            }
+
+            int[] inDegree = new int[numCourses];
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], prereq = prerequisite[1];
+                adjMap.get(prereq).add(course);
+                inDegree[course]++;
+            }
+
+            Queue<Integer> queue = new LinkedList<>();
+            for(int i = 0; i < numCourses; i++) {
+                if(inDegree[i] == 0) {
+                    queue.offer(i);
+                }
+            }
+
+            int count = 0;
+            while (!queue.isEmpty()) {
+                int currNode = queue.poll();
+                count++;
+
+                for(int neighbor: adjMap.get(currNode)) {
+                    inDegree[neighbor]--;
+                    if(inDegree[neighbor] == 0) {
+                        queue.offer(neighbor);
+                    }
+                }
+            }
+
+            return count == numCourses;
+        }
+
+        private boolean helperDFS(int node, Map<Integer, List<Integer>> adjMap, boolean[] visited, boolean[] pathVisited) {
+            visited[node] = true;
+            pathVisited[node] = true;
+
+            for(int neighbor: adjMap.get(node)) {
+                if(!visited[neighbor]) {
+                    if(!helperDFS(neighbor, adjMap, visited, pathVisited)) {
+                        return false;
+                    }
+                } else if(pathVisited[neighbor]) {
+                    return false;
+                }
+            }
+
+            pathVisited[node] = false;
+            return true;
+        }
+
+        public boolean canFinishUsingDFS(int numCourses, int[][] prerequisites) {
+            Map<Integer, List<Integer>> adjMap = new HashMap<>();
+
+            for(int i = 0; i < numCourses; i++) {
+                adjMap.put(i, new ArrayList<>());
+            }
+
+            for(int[] prerequisite: prerequisites) {
+                int course = prerequisite[0], prereq = prerequisite[1];
+                adjMap.get(prereq).add(course);
+            }
+
+            boolean[] visited = new boolean[numCourses], pathVisited = new boolean[numCourses];
+
+            for(int i = 0; i < numCourses; i++) {
+                if(!visited[i] && !helperDFS(i, adjMap, visited, pathVisited)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
     class Revision02 {
 
         // ------------------- DFS-based Cycle Detection -------------------

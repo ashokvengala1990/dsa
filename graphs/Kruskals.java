@@ -31,6 +31,89 @@ Recommendation
 import java.util.*;
 
 public class Kruskals {
+    class Revision01 {
+        class UnionFind {
+            private int[] parent, size;
+
+            UnionFind(int n) {
+                parent = new int[n];
+                size = new int[n];
+
+                for(int i = 0; i < n; i++) {
+                    parent[i] = i;
+                    size[i] = 1;
+                }
+            }
+
+            public int findUltimateParent(int node) {
+                if(parent[node] == node) {
+                    return node;
+                }
+
+                return parent[node] = findUltimateParent(parent[node]);
+            }
+
+            public boolean unionBySize(int u, int v) {
+                int ulpu = findUltimateParent(u), ulpv = findUltimateParent(v);
+
+                if(ulpu == ulpv) return false;
+
+                if(size[ulpu] < size[ulpv]) {
+                    parent[ulpu] = ulpv;
+                    size[ulpv] += size[ulpu];
+                } else {
+                    parent[ulpv] = ulpu;
+                    size[ulpu] += size[ulpv];
+                }
+
+                return true;
+            }
+        }
+
+        public int kruskalsMSTEdges(int n, int[][] edges) {
+            PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> Integer.compare(a[2], b[2]));
+            //         return (x < y) ? -1 : ((x == y) ? 0 : 1);
+
+            for(int[] edge: edges) {
+                minHeap.offer(new int[]{edge[0], edge[1], edge[2]});
+            }
+
+            int totalCost = 0;
+            List<int[]> mstEdges = new ArrayList<>();
+            UnionFind uf = new UnionFind(n);
+
+            while (!minHeap.isEmpty() && mstEdges.size() < n) {
+                int[] curr = minHeap.poll();
+                int u = curr[0], v = curr[1], wt = curr[2];
+
+                if(uf.unionBySize(u, v)) {
+                    totalCost += wt;
+                    mstEdges.add(new int[]{u, v, wt});
+                }
+            }
+
+            return mstEdges.size() == n-1 ? totalCost : -1;
+        }
+
+        public int kruskalsMST(int n, int[][] edges) {
+            Arrays.sort(edges, (a, b) -> a[2] - b[2]);
+
+            int totalCost = 0, edgesUsed = 0;
+            UnionFind  uf = new UnionFind(n);
+
+            for(int[] edge: edges) {
+                if(uf.unionBySize(edge[0], edge[1])) {  // no cycle  = add to MST
+                    edgesUsed++;
+                    totalCost += edge[2];
+
+                    if(edgesUsed == (n-1)) break;
+                }
+            }
+
+            return edgesUsed == n-1 ? totalCost : -1; // -1 = not fully connected
+        }
+    }
+
 
     // ------------------------ Union-Find Data Structure ------------------------
     class UnionFind {

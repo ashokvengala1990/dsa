@@ -1,0 +1,83 @@
+1) Bellman–Ford keeps relaxing edges even after distances change, while Dijkstra “locks” distances too early.
+2) What “relaxing an edge” means
+    - For an edge u → v with weight w:
+        if dist[u] + w < dist[v]:
+            dist[v] = dist[u] + w
+3) How Bellman–Ford works (intuitively)
+    - A graph with V vertices has at most V−1 edges in a shortest path
+    - Bellman–Ford:
+        * Relaxes ALL edges
+        * Repeats this V−1 times
+        * Guarantees shortest paths even with negative edges
+    - Why V−1 times?
+        * Each iteration allows paths with one more edge
+        * After V−1 iterations, all shortest paths are found (if no negative cycle)
+4) How Bellman–Ford detects a negative cycle
+    - Key idea ⭐
+        * If you can still relax an edge after V−1 iterations, a negative cycle exists.
+    - Why?
+        * Shortest paths are already finalized
+        * Any further improvement means:
+        * You are looping around a cycle
+        * The cycle reduces total cost
+        * ⇒ Negative cycle
+    - Example (negative cycle):
+        Directed edges
+        (0, 1, -2)
+        (1, 2, -3)
+        2, 0, 2)
+
+Note:
+Bellman–Ford detects negative cycles because it repeatedly relaxes all edges; if distances still improve after V−1 iterations,
+it proves a negative cycle exists, whereas Dijkstra fails because it prematurely finalizes distances and assumes non-negative
+edge weights.
+
+Quick memory trick 🧠
+Bellman–Ford:
+“Relax everything again and again”
+
+Dijkstra:
+“Once chosen, never change”
+
+
+=====> TUF notes
+- It must be directed graph to apply this algorithm
+- If you have given un-directed graph, you can convert to directed graph.
+- It works if the graph has negative edges weights along apart from positive weights
+- Edges can be any order but it must has directed edges
+- It helps to detect negative cycles
+- Works for the negative edges and negative cycles.
+- For a given source, and all remaining destination as considered and asking us to find the shortest path from a given source to remaining
+  nodes or vertex in graph as destination.
+- Given edges for directed graph
+
+** Relax all the edges (n-1) times sequentially.
+    - If the distance[u] + wt < distance[v])
+        then, distance[v] = distance[u] + wt;
+
+
+
+Q) Why we have do (n-1) times relaxation ?
+       dist[3] + 1 < dist[4]
+       dist[2] + 1 < dist[3]
+       dist[1] + 1 < dist[2]
+       dist[0] + 1 < dist[1]
+
+           - (u, v, wt)
+           - (3, 4, 1)
+           - (2, 3, 1)
+           - (1, 2, 1)
+           - (0, 1, 1)
+
+Q) How to detect negative cycles ?
+    - Even on Nth iteration, the relaxation will be done, and if the distance[] array gets updated, it indicates that negative cycles exists.
+    - Nth relaxation to check negative cycles.
+
+TC: O(V * E)
+SC: O(V)
+
+
+Note:
+✔A shortest path can have at most V−1 edges
+✔ After V−1 relaxations, distances should be final
+✔One extra iteration → check for negative cycles

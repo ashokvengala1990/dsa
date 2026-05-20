@@ -403,18 +403,87 @@ to minHeap (have to try both directions and carefully examine the edges)
     - Dependency Resolution: Software/library/package build orders.
     - Task Scheduling: Tasks with prerequisite tasks.
 
-Revision Tip
+Revision Tip:
 - Remember DAG + DFS/BFS + cycle detection if needed.
 - Post-order + reverse = common DFS trick.
 - Kahn’s Algorithm is neat for BFS-based solutions.
 
 
-
+<==============================================================================================>
+<==============================================================================================>
+<==============================================================================================>
 
 DFS
 BFS
-Dijkatra Algorithm
-Prims
-Krushals
-Union Find
-Topoloical Sorting
+Dijkstra Algorithm:
+    - It is able to find the shortest distance from a given src to any node (s). and helps to use the path for the shortest distance
+    from src to all remaining nodes.
+    - This algorithm doesn't works for negative edges.
+    Approach 01:
+        - PriorityQueue - Minheap (int[]-> 0th index has distance, 1st index has node , {distance, node}) ->
+          , distance array or HashMap (key: node, value: distance)
+            * For example:
+                - edge: [0, 1, -2]
+        - TC: O(E log V), where E is the number of edges and V is the number vertices or nodes., E = V^2
+            Derivation:
+                - O(V * (Pop vertex from min heap + number of edges on each vertex * push into Priority Queue))
+                - O(V * (log (heap size) + ne * log(heap size)))
+                - O(V * (log(heap size) * (ne + 1)))
+                - O(V * V * log(heap size))
+                - O(V^2 * log(heap size))
+                - O(V^2 * log(V^2))
+                - O(V^2 * 2 * log(V))
+                - O(E * 2 * log(V)) = O(E*logV), where Total edges , E = V^2
+
+    Approach 02:
+        - Use Queue Data structure - {distance, node}, distance array or hashMap (key: node, value: distance)
+        - O(V^2)
+
+Dijsktra
+Prim's
+Kruskal's
+Union Find Dataset - DisjointSet
+Topological Sorting
+Bellford algorthm
+Floyd Warshall Algorithm
+
+
+
+
+
+
+
+
+
+
+
+============>
+Dijkstra's Algorithm:
+        private int[] dijkstra(int src, int n, List<List<int[]>> adjGraph) {
+            int[] distance = new int[n];
+            Arrays.fill(distance, Integer.MAX_VALUE);
+            distance[src] = 0;
+
+            // min-heap: {cost, node}
+            PriorityQueue<int[]> minHeap = new PriorityQueue<>((a,b) -> a[0]-b[0]);
+            minHeap.offer(new int[]{0, src});
+
+            while (!minHeap.isEmpty()) {
+                int[] curr = minHeap.poll();
+                int cost = curr[0], node = curr[1];
+
+                if(cost > distance[node]) continue;
+
+                for(int[] edge: adjGraph.get(node)) {
+                    int neighbor = edge[0], weight = edge[1];
+                    int newCost = cost + weight;
+                    if(newCost < distance[neighbor]) {
+                        distance[neighbor] = newCost;
+                        minHeap.offer(new int[]{distance[neighbor], neighbor});
+                    }
+                }
+            }
+
+            return distance;
+        }
+
